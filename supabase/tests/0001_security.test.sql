@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(20);
+select plan(23);
 
 select has_table('public', 'workspaces', 'workspaces table exists');
 select has_table('public', 'workspace_members', 'workspace_members table exists');
@@ -26,6 +26,9 @@ select ok(has_function_privilege('authenticated', 'public.accept_workspace_invit
 select ok(not has_function_privilege('anon', 'public.accept_workspace_invitation(text)', 'EXECUTE'), 'anonymous users cannot accept invitations');
 select ok(not has_table_privilege('authenticated', 'public.profiles', 'INSERT'), 'profiles are created by the trusted auth trigger');
 select ok(has_function_privilege('authenticated', 'private.can_view_profile(uuid)', 'EXECUTE'), 'authenticated can use shared-profile visibility checks');
+select ok(has_function_privilege('authenticated', 'public.change_workspace_member_role(uuid,uuid,public.workspace_role)', 'EXECUTE'), 'authenticated role changes go through the checked owner RPC');
+select ok(has_function_privilege('authenticated', 'public.remove_workspace_member(uuid,uuid)', 'EXECUTE'), 'authenticated member removal goes through the checked RPC');
+select ok(not has_function_privilege('anon', 'public.remove_workspace_member(uuid,uuid)', 'EXECUTE'), 'anonymous users cannot remove workspace members');
 
 select * from finish();
 rollback;
