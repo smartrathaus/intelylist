@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, statusBarStyle: "default", title: "intelylist" },
   robots: { index: false, follow: false }
 };
-export const viewport: Viewport = { themeColor: "#f7f8f6", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#f5f8fa", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="de"><body><ServiceWorkerRegistration/>{children}</body></html>;
