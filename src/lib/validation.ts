@@ -14,7 +14,7 @@ export const entrySchema = z.object({
   notes: z.preprocess(emptyToUndefined, z.string().trim().max(2000).optional()),
   kind: z.enum(["tasks", "shopping", "mixed"]),
   priority: z.preprocess(emptyToUndefined, z.enum(["low", "normal", "high", "urgent"]).default("normal")),
-  dueAt: z.preprocess(emptyToUndefined, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
+  dueAt: z.preprocess(emptyToUndefined, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => { const date = new Date(value + "T00:00:00.000Z"); return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value; }).optional()),
   assignedTo: z.preprocess(emptyToUndefined, z.string().uuid().optional()),
   quantity: z.preprocess(emptyToUndefined, z.coerce.number().positive().max(100000).optional()),
   unit: z.preprocess(emptyToUndefined, z.string().trim().max(32).optional()),
