@@ -90,7 +90,7 @@ export async function createEntry(formData: FormData) {
   const parsed = entrySchema.safeParse({
     listId: formData.get("listId"), title: formData.get("title"), kind: formData.get("kind"),
     notes: formData.get("notes"), priority: formData.get("priority"), dueAt: formData.get("dueAt"), assignedTo: formData.get("assignedTo"),
-    quantity: formData.get("quantity"), unit: formData.get("unit"), category: formData.get("category"), supermarket: formData.get("supermarket"), supermarket: formData.get("supermarket")
+    quantity: formData.get("quantity"), unit: formData.get("unit"), category: formData.get("category"), supermarket: formData.get("supermarket"), supermarket: formData.get("supermarket"), supermarket: formData.get("supermarket")
   });
   if (!parsed.success) redirect("/?error=Bitte+einen+gueltigen+Eintrag+eingeben.");
   const supabase = await createClient();
@@ -105,7 +105,8 @@ export async function createEntry(formData: FormData) {
     assigned_to: parsed.data.assignedTo ?? null,
     quantity: parsed.data.quantity ?? null,
     unit: parsed.data.unit || null,
-    category: parsed.data.category || null
+    category: parsed.data.category || null,
+    supermarket: parsed.data.supermarket || null
   });
   if (error) redirect(`/w/${list.workspace_id}/lists/${list.id}?error=Eintrag+konnte+nicht+gespeichert+werden.`);
   revalidatePath(`/w/${list.workspace_id}/lists/${list.id}`);
@@ -228,7 +229,7 @@ export async function updateEntry(formData: FormData) {
     listId: formData.get("listId"), title: formData.get("title"), notes: formData.get("notes"),
     kind: formData.get("kind"), priority: formData.get("priority"), dueAt: formData.get("dueAt"),
     assignedTo: formData.get("assignedTo"), quantity: formData.get("quantity"),
-    unit: formData.get("unit"), category: formData.get("category")
+    unit: formData.get("unit"), category: formData.get("category"), supermarket: formData.get("supermarket")
   });
   if (!parsed.success) redirect("/?error=Bitte+die+Eintragsdaten+pruefen.");
   const supabase = await createClient();
