@@ -1,0 +1,10 @@
+{
+  "name": "intelylist",
+  "short_name": "intelylist",
+  "description": "Gemeinsam organisieren. Einfach erledigen.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f8f6",
+  "theme_color": "#f7f8f6",
+  "lang": "de"
+}
