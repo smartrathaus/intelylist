@@ -20,13 +20,13 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   const { data: profiles } = memberIds.length
     ? await supabase.from("profiles").select("user_id,display_name").in("user_id", memberIds)
     : { data: [] };
-  const params = await searchParams;
+  const query = await searchParams;
   const currentRole = (members ?? []).find(m => m.user_id === user.id)?.role;
   return <main className="app-shell">
     <header className="topbar"><Link href="/" className="brand"><span className="brand-mark"><ArrowLeft size={18}/></span><span>Alle Bereiche</span></Link><span className="topbar-context">{workspace.name}</span></header>
     <section className="dashboard">
       <p className="eyebrow">BEREICH</p><div className="welcome-row"><div><h1>{workspace.name}</h1><p className="muted">Hier laufen eure gemeinsamen Listen zusammen.</p></div><div className="summary-chip"><Users size={17}/>{members?.length ?? 1} Mitglieder</div></div>
-      {params.error && <p className="notice notice-error">{params.error}</p>}{params.message && <p className="notice notice-success">{params.message}</p>}
+      {query.error && <p className="notice notice-error">{params.error}</p>}{query.message && <p className="notice notice-success">{params.message}</p>}
       <div className="section-heading"><div><h2>Listen</h2><p className="muted">Wähle eine Liste oder erstelle eine neue.</p></div></div>
       {lists?.length ? <div className="list-grid">{lists.map((list) => <Link href={`/w/${workspaceId}/lists/${list.id}`} className="list-card" key={list.id}><div className={`list-icon ${list.kind === "shopping" ? "shopping" : ""}`}>{list.kind === "shopping" ? <ShoppingBasket size={21}/> : <CheckSquare size={21}/>}</div><div className="list-card-copy"><h3>{list.name}</h3><p>{list.kind === "shopping" ? "Einkaufsliste" : list.kind === "mixed" ? "Gemischte Liste" : "Aufgabenliste"}</p></div><ArrowRight size={18} className="workspace-arrow"/></Link>)}</div> : <div className="empty-state"><div className="empty-icon"><CheckSquare size={24}/></div><h3>Der erste Schritt ist eine Liste.</h3><p>Lege eine Aufgaben- oder Einkaufsliste für diesen Bereich an.</p></div>}
       <section className="members-panel">
