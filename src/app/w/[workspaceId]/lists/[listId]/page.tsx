@@ -14,7 +14,7 @@ export default async function ListPage({ params, searchParams }: { params: Promi
   if (!user) redirect("/login");
   const { data: list } = await supabase.from("lists").select("id,name,kind,workspace_id,workspaces(name)").eq("id", listId).eq("workspace_id", workspaceId).single();
   if (!list) notFound();
-  const { data: entries } = await supabase.from("list_entries").select("id,title,notes,is_completed,priority,due_at,quantity,unit,category,assigned_to").eq("list_id", listId).order("is_completed").order("position").order("created_at");
+  const { data: entries } = await supabase.from("list_entries").select("id,title,notes,is_completed,priority,due_at,quantity,unit,category,assigned_to").eq("list_id", listId).order("position").order("created_at");
   const { data: memberRows } = await supabase.from("workspace_members").select("user_id").eq("workspace_id", workspaceId);
   const memberIds = (memberRows ?? []).map((member) => member.user_id);
   const { data: profiles } = memberIds.length
