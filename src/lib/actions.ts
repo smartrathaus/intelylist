@@ -3,10 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { createHash, randomBytes } from "node:crypto";
 import { workspaceSchema, listSchema, entrySchema } from "@/lib/validation";
 import { createClient } from "@/lib/supabase/server";
 
+function safeInternalPath(value: string) { return value.startsWith("/") && !value.startsWith("//") ? value : "/"; }
+
 export async function signIn(formData: FormData) {
+  const next = safeInternalPath(String(formData.get("next") ?? "/"));
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   if (!z.email().safeParse(email).success || password.length < 8) {
@@ -18,7 +22,7 @@ export async function signIn(formData: FormData) {
   redirect("/");
 }
 
-export async function signUp(formData: FormData) {
+export async function signUp(formData: FormData) {\n  const next = safeInternalPath(String(formData.get("next") ?? "/"));
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   if (!z.email().safeParse(email).success || password.length < 10) {
@@ -27,7 +31,7 @@ export async function signUp(formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email, password,
-    options: { emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback` : undefined }
+    options: { emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent(next)}` : undefined }
   });
   if (error) redirect("/login?error=Registrierung+nicht+moeglich.+Bitte+spaeter+erneut+versuchen.");
   redirect("/login?message=Bitte+pruefe+dein+Postfach+und+bestaetige+deine+E-Mail.");
@@ -111,4 +115,56 @@ export async function deleteEntry(formData: FormData) {
   const workspaceId = (entry.lists as unknown as { workspace_id: string }).workspace_id;
   const { error } = await supabase.from("list_entries").delete().eq("id", id);
   if (!error) revalidatePath(`/w/${workspaceId}/lists/${entry.list_id}`);
+}
+
+export type InvitationActionState = { error?: string; inviteUrl?: string };
+
+export async function createInvitation(_previous: InvitationActionState, formData: FormData): Promise<InvitationActionState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const workspaceId = String(formData.get("workspaceId") ?? "");
+  const requestedRole = String(formData.get("role") ?? "member");
+  if (!z.email().safeParse(email).success || !z.uuid().safeParse(workspaceId).success || !["member", "admin"].includes(requestedRole)) {
+    return { error: "Bitte E-Mail-Adresse und Rolle prüfen." };
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl) return { error: "Die öffentliche App-Adresse ist noch nicht konfiguriert." };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Bitte zuerst anmelden." };
+
+  const { data: membership } = await supabase.from("workspace_members")
+    .select("role").eq("workspace_id", workspaceId).eq("user_id", user.id).maybeSingle();
+  if (!membership || !["owner", "admin"].includes(membership.role)) {
+    return { error: "Du darfst für diesen Bereich keine Einladungen erstellen." };
+  }
+  if (requestedRole === "admin" && membership.role !== "owner") {
+    return { error: "Nur der Bereichsinhaber kann Admin-Rechte vergeben." };
+  }
+
+  const token = randomBytes(32).toString("base64url");
+  const tokenHash = createHash("sha256").update(token).digest("hex");
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { error } = await supabase.from("workspace_invitations").insert({
+    workspace_id: workspaceId, email, role: requestedRole, token_hash: tokenHash,
+    invited_by: user.id, expires_at: expiresAt
+  });
+  if (error) return { error: "Die Einladung konnte nicht erstellt werden. Bitte erneut versuchen." };
+
+  const inviteUrl = new URL(`/invite/${token}`, siteUrl).toString();
+  revalidatePath(`/w/${workspaceId}`);
+  return { inviteUrl };
+}
+
+export async function acceptInvitation(token: string) {
+  if (!/^[A-Za-z0-9_-]{43}$/.test(token)) redirect("/login?error=Der+Einladungslink+ist+ungueltig.");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect(`/login?next=${encodeURIComponent(`/invite/${token}`)}`);
+  const tokenHash = createHash("sha256").update(token).digest("hex");
+  const { data: workspaceId, error } = await supabase.rpc("accept_workspace_invitation", { token_hash: tokenHash });
+  if (error || !workspaceId) redirect(`/invite/${token}?error=Einladung+nicht+gueltig.+Bitte+E-Mail+und+Frist+pruefen.`);
+  revalidatePath("/");
+  redirect(`/w/${workspaceId}`);
 }
