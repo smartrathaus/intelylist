@@ -1,10 +1,14 @@
 {
-  "name": "intelylist",
+  "name": "intelylist – Gemeinsam organisieren",
   "short_name": "intelylist",
   "description": "Gemeinsam organisieren. Einfach erledigen.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f7f8f6",
-  "theme_color": "#f7f8f6",
-  "lang": "de"
+  "theme_color": "#246b50",
+  "lang": "de",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
 }
