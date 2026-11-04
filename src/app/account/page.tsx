@@ -16,7 +16,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   return <main className="app-shell">
     <header className="topbar"><Link href="/" className="brand"><span className="brand-mark"><ArrowLeft size={18}/></span><span>Zur Übersicht</span></Link></header>
     <section className="dashboard account-page">
-      <div className="brand"><span className="brand-mark"><Layers3 size={19}/></span><span>intelylist</span></div>
+      <div className="brand"><img className="brand-logo" src="/intelylist-logo.svg" alt="intelylist – Intelligente Aufgabenverwaltung"/></div>
       <p className="eyebrow">KONTO</p><h1>Kontoeinstellungen</h1>
       <p className="muted">Angemeldet als {user.email}</p>
       <section className="account-panel"><h2>Passwort</h2><p className="muted">Du kannst jederzeit einen Link zum Zurücksetzen deines Passworts anfordern.</p><Link className="button button-secondary" href="/login/reset">Passwort zurücksetzen</Link></section>
