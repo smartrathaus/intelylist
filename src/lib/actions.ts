@@ -22,7 +22,8 @@ export async function signIn(formData: FormData) {
   redirect(next);
 }
 
-export async function signUp(formData: FormData) {\n  const next = safeInternalPath(String(formData.get("next") ?? "/"));
+export async function signUp(formData: FormData) {
+  const next = safeInternalPath(String(formData.get("next") ?? "/"));
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   if (!z.email().safeParse(email).success || password.length < 10) {
