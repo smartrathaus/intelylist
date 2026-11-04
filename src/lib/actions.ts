@@ -7,7 +7,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { workspaceSchema, listSchema, entrySchema } from "@/lib/validation";
 import { createClient } from "@/lib/supabase/server";
 
-function safeInternalPath(value: string) { return value.startsWith("/") && !value.startsWith("//") && !value.includes(String.fromCharCode(92)) && !value.includes("\\r") && !value.includes("\\n") ? value : "/"; }
+function safeInternalPath(value: string) { return value.startsWith("/") && !value.startsWith("//") && !value.includes(String.fromCharCode(92)) && !value.includes(String.fromCharCode(10)) && !value.includes(String.fromCharCode(13)) ? value : "/"; }
 
 export async function signIn(formData: FormData) {
   const next = safeInternalPath(String(formData.get("next") ?? "/"));
