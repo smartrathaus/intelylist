@@ -23,6 +23,7 @@ export default async function ListPage({ params, searchParams }: { params: Promi
   const paramsData = await searchParams;
   const workspace = Array.isArray(list.workspaces) ? list.workspaces[0] : list.workspaces;
   const isShopping = list.kind === "shopping";
+  const isMixed = list.kind === "mixed";
   return <main className="app-shell">
     <header className="topbar"><Link href={`/w/${workspaceId}`} className="brand"><span className="brand-mark"><ArrowLeft size={18}/></span><span>{workspace?.name ?? "Bereich"}</span></Link><span className="topbar-context">{list.name}</span></header>
     <section className="dashboard list-page">
@@ -31,8 +32,8 @@ export default async function ListPage({ params, searchParams }: { params: Promi
       <form action={createEntry} className="entry-form entry-form-advanced">
         <input type="hidden" name="listId" value={listId}/><input type="hidden" name="kind" value={list.kind}/>
         <input name="title" placeholder={isShopping ? "Was wird benötigt?" : "Welche Aufgabe steht an?"} aria-label="Neuer Eintrag" maxLength={240} required/>
-        {isShopping && <><input name="quantity" type="number" min="0.01" step="0.01" placeholder="Menge" aria-label="Menge"/><input name="unit" maxLength={32} placeholder="Einheit" aria-label="Einheit"/><input name="category" maxLength={80} placeholder="Kategorie" aria-label="Kategorie"/></>}
-        {!isShopping && <><select name="priority" aria-label="Priorität" defaultValue="normal"><option value="low">Niedrig</option><option value="normal">Normal</option><option value="high">Hoch</option><option value="urgent">Dringend</option></select><input name="dueAt" type="date" aria-label="Fällig am"/></>}
+        {(isShopping || isMixed) && <><input name="quantity" type="number" min="0.01" step="0.01" placeholder="Menge" aria-label="Menge"/><input name="unit" maxLength={32} placeholder="Einheit" aria-label="Einheit"/><input name="category" maxLength={80} placeholder="Kategorie" aria-label="Kategorie"/></>}
+        {(!isShopping || isMixed) && <><select name="priority" aria-label="Priorität" defaultValue="normal"><option value="low">Niedrig</option><option value="normal">Normal</option><option value="high">Hoch</option><option value="urgent">Dringend</option></select><input name="dueAt" type="date" aria-label="Fällig am"/></>}
         <select name="assignedTo" aria-label="Zuständigkeit" defaultValue=""><option value="">Nicht zugewiesen</option>{(profiles ?? []).map(profile => <option value={profile.user_id} key={profile.user_id}>{profile.display_name}</option>)}</select>
         <button className="button button-primary" type="submit"><Plus size={17}/> Hinzufügen</button>
       </form>
