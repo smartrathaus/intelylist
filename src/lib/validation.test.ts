@@ -22,6 +22,14 @@ describe("input validation", () => {
     expect(entrySchema.safeParse({ ...valid, title: "x".repeat(241) }).success).toBe(false);
   });
 
+  it("accepts optional item metadata but rejects invalid values", () => {
+    const base = { listId: "2b4e4e6b-59b7-4d6d-8e53-9b84edc98f10", title: "Milch", kind: "shopping" };
+    expect(entrySchema.safeParse({ ...base, priority: null, quantity: "2", unit: "Liter" }).success).toBe(true);
+    expect(entrySchema.safeParse({ ...base, quantity: "-1" }).success).toBe(false);
+    expect(entrySchema.safeParse({ ...base, dueAt: "nächste Woche" }).success).toBe(false);
+    expect(entrySchema.safeParse({ ...base, assignedTo: "not-a-uuid" }).success).toBe(false);
+  });
+
   it("normalizes email addresses and enforces password length", () => {
     expect(credentialsSchema.parse({ email: "  TEST@EXAMPLE.DE ", password: "12345678" }).email).toBe("test@example.de");
     expect(credentialsSchema.safeParse({ email: "invalid", password: "12345678" }).success).toBe(false);
