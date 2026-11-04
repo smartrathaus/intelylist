@@ -177,10 +177,8 @@ set search_path = ''
 as $$
 begin
   if tg_op = 'DELETE' then
-    -- Allow the FK cascade when the whole workspace is being deleted.
-    if old.role = 'owner' and exists (
-      select 1 from public.workspaces w where w.id = old.workspace_id
-    ) then
+    -- Direct owner-row deletion is blocked; nested FK cascade from deleting the workspace is allowed.
+    if old.role = 'owner' and pg_trigger_depth() <= 1 then
       raise exception 'Workspace owner must be transferred explicitly' using errcode = '42501';
     end if;
     return old;
