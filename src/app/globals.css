@@ -36,19 +36,3 @@ input:focus,select:focus{border-color:#75c9c1;box-shadow:0 0 0 3px rgba(41,159,1
 .auth-shell{background:radial-gradient(ellipse at 50% 0%,#e3f5f2 0%,var(--bg) 60%)}
 .notice-success{background:#e5f5f3;color:#247f79}
 .list-icon.shopping,.priority-high{background:#fff4df;color:#a86c12}
-
-/* High-comfort shopping controls */
-.new-quantity,.quantity-control{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:11px;background:#fff;padding:4px}
-.new-quantity button,.quantity-control button{width:32px;height:32px;border:0;border-radius:8px;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
-.new-quantity button:hover,.quantity-control button:hover:not(:disabled){background:var(--green);color:#fff}
-.new-quantity output{min-width:22px;text-align:center;font-weight:750;font-variant-numeric:tabular-nums;color:var(--ink)}
-.quantity-control{padding:2px 4px;gap:4px}.quantity-control button{width:27px;height:27px}.quantity-control strong{min-width:20px;text-align:center;font-size:13px;font-variant-numeric:tabular-nums}.quantity-control small{padding:0 5px}
-.search-field{display:flex;align-items:center;gap:7px;flex:1;min-width:170px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 10px;color:var(--muted)}
-.search-field input{border:0;outline:0;box-shadow:none!important;flex:1;padding:11px 0;min-width:0}
-.store-tag{display:inline-flex!important;align-items:center;background:#eaf2fa;color:#356d9a!important;border-radius:999px;padding:4px 8px;font-weight:650}
-.entry-copy{align-items:center}.entry-copy>span{flex-basis:auto;min-width:120px}
-.entry-row.is-complete{background:#f8fafb}
-.entry-row.is-complete .quantity-control{opacity:.75}
-.entry-manager .entry-form-advanced>input{border:1px solid var(--line);flex:1 1 140px}
-.entry-manager .entry-form-advanced>input[name="title"]{flex:2 1 220px}
-@media(max-width:700px){.new-quantity{flex:0 0 auto}.new-quantity button{width:38px;height:38px}.search-field{grid-column:1/-1;width:100%}.quantity-control button{width:34px;height:34px}.entry-copy>span{flex-basis:100%}.entry-manager .entry-form-advanced>input[name="title"]{flex-basis:100%}}
