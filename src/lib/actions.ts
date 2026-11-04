@@ -355,3 +355,60 @@ export async function deleteOwnAccount(formData: FormData) {
   await supabase.auth.signOut({ scope: "local" });
   redirect("/login?message=Dein+Konto+wurde+geloescht.");
 }
+
+
+export type QuickEntryResult = { ok: true; duplicate?: { id: string; title: string; quantity: number } } | { ok: false; message: string };
+
+export async function addEntrySmart(input: { listId: string; title: string; kind: "tasks" | "shopping" | "mixed"; quantity?: number; unit?: string }) : Promise<QuickEntryResult> {
+  const parsed = z.object({ listId: z.uuid(), title: z.string().trim().min(1).max(240), kind: z.enum(["tasks","shopping","mixed"]), quantity: z.number().positive().max(100000).optional(), unit: z.string().max(32).optional() }).safeParse(input);
+  if (!parsed.success) return { ok: false, message: "Bitte prüfe den Eintrag." };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, message: "Bitte melde dich erneut an." };
+  const { data: list } = await supabase.from("lists").select("id,workspace_id,kind").eq("id", parsed.data.listId).single();
+  if (!list || list.kind !== parsed.data.kind) return { ok: false, message: "Die Liste wurde nicht gefunden." };
+  const isShopping = list.kind === "shopping" || list.kind === "mixed";
+  const quantity = isShopping ? (parsed.data.quantity ?? 1) : null;
+  if (isShopping) {
+    const { data: existing } = await supabase.from("list_entries").select("id,title,quantity").eq("list_id", list.id).eq("is_completed", false).ilike("title", parsed.data.title).limit(1).maybeSingle();
+    if (existing) return { ok: true, duplicate: { id: existing.id, title: existing.title, quantity: Number(existing.quantity ?? 1) } };
+  }
+  const { error } = await supabase.from("list_entries").insert({ list_id: list.id, title: parsed.data.title, created_by: user.id, quantity, unit: parsed.data.unit || null, priority: "normal" });
+  if (error) return { ok: false, message: "Der Eintrag konnte nicht gespeichert werden." };
+  revalidatePath(`/w/${list.workspace_id}/lists/${list.id}`);
+  return { ok: true };
+}
+
+export async function confirmDuplicateQuantity(input: { listId: string; entryId: string; expectedQuantity: number }) : Promise<QuickEntryResult> {
+  const parsed = z.object({ listId: z.uuid(), entryId: z.uuid(), expectedQuantity: z.number().nonnegative() }).safeParse(input);
+  if (!parsed.success) return { ok: false, message: "Ungültige Eingabe." };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, message: "Bitte melde dich erneut an." };
+  const { data: entry } = await supabase.from("list_entries").select("id,title,quantity,list_id,lists!inner(workspace_id,kind)").eq("id", parsed.data.entryId).eq("list_id", parsed.data.listId).single();
+  if (!entry || (entry.lists as unknown as {kind:string}).kind === "tasks") return { ok: false, message: "Der Eintrag ist nicht mehr verfügbar." };
+  const current = Number(entry.quantity ?? 1);
+  if (current !== parsed.data.expectedQuantity) return { ok: false, message: "Die Menge wurde zwischenzeitlich geändert. Bitte erneut versuchen." };
+  const { error } = await supabase.from("list_entries").update({ quantity: current + 1 }).eq("id", entry.id).eq("list_id", entry.list_id);
+  if (error) return { ok: false, message: "Die Menge konnte nicht erhöht werden." };
+  const workspaceId = (entry.lists as unknown as {workspace_id:string}).workspace_id;
+  revalidatePath(`/w/${workspaceId}/lists/${entry.list_id}`);
+  return { ok: true };
+}
+
+export async function saveEntryOrder(input: { listId: string; orderedIds: string[] }) {
+  const parsed = z.object({ listId: z.uuid(), orderedIds: z.array(z.uuid()).max(500) }).safeParse(input);
+  if (!parsed.success) return { ok: false as const };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false as const };
+  const { data: list } = await supabase.from("lists").select("workspace_id").eq("id", parsed.data.listId).single();
+  if (!list) return { ok: false as const };
+  const { data: rows } = await supabase.from("list_entries").select("id").eq("list_id", parsed.data.listId);
+  const actual = new Set((rows ?? []).map(row => row.id));
+  if (actual.size !== parsed.data.orderedIds.length || parsed.data.orderedIds.some(id => !actual.has(id))) return { ok: false as const };
+  const updates = await Promise.all(parsed.data.orderedIds.map((id, index) => supabase.from("list_entries").update({ position: index }).eq("id", id).eq("list_id", parsed.data.listId)));
+  if (updates.some(result => result.error)) return { ok: false as const };
+  revalidatePath(`/w/${list.workspace_id}/lists/${parsed.data.listId}`);
+  return { ok: true as const };
+}
