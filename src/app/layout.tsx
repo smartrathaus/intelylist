@@ -7,7 +7,8 @@ export const metadata: Metadata = {
   description: "Aufgaben und Einkaufslisten gemeinsam im Blick.",
   applicationName: "intelylist",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "intelylist" }
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "intelylist" },
+  robots: { index: false, follow: false }
 };
 export const viewport: Viewport = { themeColor: "#f7f8f6", width: "device-width", initialScale: 1 };
 
