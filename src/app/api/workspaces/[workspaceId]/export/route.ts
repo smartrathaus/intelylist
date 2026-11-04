@@ -43,7 +43,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ wor
   return new Response(JSON.stringify(exportData, null, 2), {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
-      "Content-Disposition": `attachment; filename="intelylist-${workspaceId}-export.json"`,
+      "Content-Disposition": `attachment; filename="intelylist-export.json"`,
       "Cache-Control": "private, no-store, max-age=0"
     }
   });

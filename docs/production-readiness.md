@@ -32,7 +32,7 @@ Diese Liste trennt bereits implementierte Grundlagen von Nachweisen, die vor ein
 ## Bekannte Produktgrenzen der aktuellen Version
 - Einladungen werden als Link erzeugt und manuell geteilt; ein E-Mail-Versand ist nicht integriert.
 - Owner-Übertragung ist nicht implementiert.
-- Nutzer können einen Bereich nicht selbst verlassen; Owner können andere Nicht-Owner entfernen.
-- Es gibt noch keine Oberfläche für Workspace-Löschung, Kontolöschung oder Datenexport.
+- Nicht-Owner können Bereiche verlassen; Owner können Bereiche endgültig löschen. Owner-Übertragung ist nicht implementiert.
+- Workspace-Löschung, JSON-Export und Kontolöschung sind implementiert; die Kontolöschung benötigt den serverseitigen SUPABASE_SERVICE_ROLE_KEY und muss auf einem echten Projekt getestet werden.
 - Offline werden keine privaten Inhalte gespeichert oder bearbeitet.
 - Eine erfolgreiche CI ersetzt keine Live-Sicherheitsprüfung und keinen Datenschutz-/Rechtscheck.

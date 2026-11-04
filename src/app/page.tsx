@@ -27,7 +27,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   return <main className="app-shell">
     <header className="topbar">
       <Link href="/" className="brand"><span className="brand-mark"><Layers3 size={19}/></span><span>intelylist</span></Link>
-      <div className="topbar-right"><span className="user-email">{user.email}</span><form action={signOut}><button className="button button-ghost button-small">Abmelden</button></form></div>
+      <div className="topbar-right"><span className="user-email">{user.email}</span><Link href="/account" className="button button-ghost button-small">Konto</Link><form action={signOut}><button className="button button-ghost button-small">Abmelden</button></form></div>
     </header>
     <section className="dashboard">
       <div className="welcome-row">

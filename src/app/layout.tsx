@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "intelylist – Gemeinsam organisieren",
   description: "Aufgaben und Einkaufslisten gemeinsam im Blick.",
   applicationName: "intelylist",
+  icons: { icon: "/icon.svg" },
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "intelylist" },
   robots: { index: false, follow: false }
