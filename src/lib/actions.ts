@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { workspaceSchema, listSchema, entrySchema } from "@/lib/validation";
 import { createClient } from "@/lib/supabase/server";
@@ -52,12 +52,22 @@ export async function createWorkspace(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const { data, error } = await supabase.from("workspaces")
-    .insert({ name: parsed.data.name, created_by: user.id })
-    .select("id").single();
-  if (error || !data) redirect("/?error=Der+Bereich+konnte+nicht+angelegt+werden.");
+
+  // Generate the ID client-side so the insert does not need a RLS-filtered
+  // INSERT ... RETURNING read before the AFTER INSERT owner-membership trigger
+  // becomes visible to the SELECT policy.
+  const workspaceId = randomUUID();
+  const { error } = await supabase.from("workspaces").insert({
+    id: workspaceId, name: parsed.data.name, created_by: user.id
+  });
+  if (error) {
+    console.error("[createWorkspace] insert failed", {
+      code: error.code, message: error.message, hint: error.hint
+    });
+    redirect("/?error=Der+Bereich+konnte+nicht+angelegt+werden.");
+  }
   revalidatePath("/");
-  redirect(`/w/${data.id}`);
+  redirect(`/w/${workspaceId}`);
 }
 
 export async function createList(formData: FormData) {
