@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Check, Circle, Plus, ShoppingBasket, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { createEntry, deleteEntry, toggleEntry, updateEntry } from "@/lib/actions";
+import { EntryManager } from "@/components/entry-manager";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 
 export const dynamic = "force-dynamic";
@@ -29,35 +29,7 @@ export default async function ListPage({ params, searchParams }: { params: Promi
     <section className="dashboard list-page">
       <p className="eyebrow">{isShopping ? "EINKAUFSLISTE" : "AUFGABENLISTE"}</p><div className="welcome-row"><div><h1>{list.name}</h1><p className="muted">{entries?.filter(e => !e.is_completed).length ?? 0} offen · {entries?.filter(e => e.is_completed).length ?? 0} erledigt</p></div><div className={`list-icon large ${isShopping ? "shopping" : ""}`}>{isShopping ? <ShoppingBasket size={24}/> : <Check size={24}/>}</div></div>
       {paramsData.error && <p className="notice notice-error">{paramsData.error}</p>}
-      <form action={createEntry} className="entry-form entry-form-advanced">
-        <input type="hidden" name="listId" value={listId}/><input type="hidden" name="kind" value={list.kind}/>
-        <input name="title" placeholder={isShopping ? "Was wird benötigt?" : "Welche Aufgabe steht an?"} aria-label="Neuer Eintrag" maxLength={240} required/><input name="notes" placeholder="Notiz (optional)" aria-label="Notiz" maxLength={2000}/>
-        {(isShopping || isMixed) && <><input name="quantity" type="number" min="0.01" step="0.01" placeholder="Menge" aria-label="Menge"/><input name="unit" maxLength={32} placeholder="Einheit" aria-label="Einheit"/><input name="category" maxLength={80} placeholder="Kategorie" aria-label="Kategorie"/></>}
-        {(!isShopping || isMixed) && <><select name="priority" aria-label="Priorität" defaultValue="normal"><option value="low">Niedrig</option><option value="normal">Normal</option><option value="high">Hoch</option><option value="urgent">Dringend</option></select><input name="dueAt" type="date" aria-label="Fällig am"/></>}
-        <select name="assignedTo" aria-label="Zuständigkeit" defaultValue=""><option value="">Nicht zugewiesen</option>{(profiles ?? []).map(profile => <option value={profile.user_id} key={profile.user_id}>{profile.display_name}</option>)}</select>
-        <button className="button button-primary" type="submit"><Plus size={17}/> Hinzufügen</button>
-      </form>
-      <div className="entry-list">{entries?.map((entry) => <div className={`entry-row ${entry.is_completed ? "is-complete" : ""}`} key={entry.id}>
-        <form action={toggleEntry}><input type="hidden" name="id" value={entry.id}/><input type="hidden" name="completed" value={String(!entry.is_completed)}/><button className="check-button" aria-label={entry.is_completed ? "Als offen markieren" : "Als erledigt markieren"}><span>{entry.is_completed ? <Check size={14}/> : <Circle size={19}/>}</span></button></form>
-        <div className="entry-copy"><span>{entry.title}</span>
-          {entry.notes ? <small>{entry.notes}</small> : null}{(isShopping || isMixed) && (entry.quantity || entry.unit) ? <small>{entry.quantity ?? ""} {entry.unit ?? ""}</small> : null}
-          {(isShopping || isMixed) && entry.category ? <small>{entry.category}</small> : null}
-          {!isShopping && entry.due_at ? <small>Fällig: {new Date(entry.due_at).toLocaleDateString("de-DE")}</small> : null}
-          {entry.assigned_to ? <small>→ {(profiles ?? []).find(profile => profile.user_id === entry.assigned_to)?.display_name ?? "Mitglied"}</small> : null}
-        </div>
-        {entry.priority !== "normal" && !isShopping && <span className={`priority priority-${entry.priority}`}>{entry.priority === "urgent" ? "Dringend" : entry.priority === "high" ? "Hoch" : "Niedrig"}</span>}
-        <details className="entry-edit"><summary>Bearbeiten</summary><form action={updateEntry} className="entry-edit-form">
-          <input type="hidden" name="id" value={entry.id}/><input type="hidden" name="listId" value={listId}/><input type="hidden" name="kind" value={list.kind}/>
-          <label>Titel<input name="title" defaultValue={entry.title} maxLength={240} required/></label>
-          <label>Notiz<input name="notes" defaultValue={entry.notes ?? ""} maxLength={2000}/></label>
-          {(isShopping || isMixed) && <div className="edit-field-row"><label>Menge<input name="quantity" type="number" min="0.01" step="0.01" defaultValue={entry.quantity ?? ""}/></label><label>Einheit<input name="unit" maxLength={32} defaultValue={entry.unit ?? ""}/></label><label>Kategorie<input name="category" maxLength={80} defaultValue={entry.category ?? ""}/></label></div>}
-          {(!isShopping || isMixed) && <div className="edit-field-row"><label>Priorität<select name="priority" defaultValue={entry.priority}><option value="low">Niedrig</option><option value="normal">Normal</option><option value="high">Hoch</option><option value="urgent">Dringend</option></select></label><label>Fällig am<input name="dueAt" type="date" defaultValue={entry.due_at ? entry.due_at.slice(0,10) : ""}/></label></div>}
-          <label>Zuständig<select name="assignedTo" defaultValue={entry.assigned_to ?? ""}><option value="">Nicht zugewiesen</option>{(profiles ?? []).map(profile => <option value={profile.user_id} key={profile.user_id}>{profile.display_name}</option>)}</select></label>
-          <button className="button button-secondary" type="submit">Änderungen speichern</button>
-        </form></details>
-        <form action={deleteEntry}><input type="hidden" name="id" value={entry.id}/><button className="icon-button" aria-label="Eintrag löschen"><Trash2 size={16}/></button></form>
-      </div>)}</div>
-      {!entries?.length && <div className="empty-state compact"><p>Noch keine Einträge. Füge oben den ersten hinzu.</p></div>}
+      <EntryManager listId={listId} kind={list.kind as "tasks"|"shopping"|"mixed"} entries={(entries ?? []) as {id:string;title:string;notes:string|null;is_completed:boolean;priority:string;due_at:string|null;quantity:number|null;unit:string|null;category:string|null;assigned_to:string|null}[]} profiles={(profiles ?? []) as {user_id:string;display_name:string}[]}/>
       <RealtimeRefresh channel={`list-${listId}`} table="list_entries" filter={`list_id=eq.${listId}`}/>
     </section>
     <footer className="footer">intelylist <span>·</span> Änderungen werden automatisch aktualisiert.</footer>
