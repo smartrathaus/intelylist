@@ -78,7 +78,7 @@ export async function createList(formData: FormData) {
 export async function createEntry(formData: FormData) {
   const parsed = entrySchema.safeParse({
     listId: formData.get("listId"), title: formData.get("title"), kind: formData.get("kind"),
-    priority: formData.get("priority"), dueAt: formData.get("dueAt"), assignedTo: formData.get("assignedTo"),
+    notes: formData.get("notes"), priority: formData.get("priority"), dueAt: formData.get("dueAt"), assignedTo: formData.get("assignedTo"),
     quantity: formData.get("quantity"), unit: formData.get("unit"), category: formData.get("category")
   });
   if (!parsed.success) redirect("/?error=Bitte+einen+gueltigen+Eintrag+eingeben.");
@@ -88,7 +88,7 @@ export async function createEntry(formData: FormData) {
   const { data: list } = await supabase.from("lists").select("id,workspace_id,kind").eq("id", parsed.data.listId).single();
   if (!list || list.kind !== parsed.data.kind) redirect("/");
   const { error } = await supabase.from("list_entries").insert({
-    list_id: list.id, title: parsed.data.title, created_by: user.id,
+    list_id: list.id, title: parsed.data.title, notes: parsed.data.notes || null, created_by: user.id,
     priority: parsed.data.priority,
     due_at: parsed.data.dueAt ? new Date(`${parsed.data.dueAt}T12:00:00.000Z`).toISOString() : null,
     assigned_to: parsed.data.assignedTo ?? null,
@@ -204,4 +204,34 @@ export async function updatePassword(formData: FormData) {
   const { error } = await supabase.auth.updateUser({ password });
   if (error) redirect("/account/update-password?error=Das+Passwort+konnte+nicht+geaendert+werden.");
   redirect("/?message=Passwort+erfolgreich+geaendert.");
+}
+
+
+export async function updateEntry(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!z.uuid().safeParse(id).success) redirect("/");
+  const parsed = entrySchema.safeParse({
+    listId: formData.get("listId"), title: formData.get("title"), notes: formData.get("notes"),
+    kind: formData.get("kind"), priority: formData.get("priority"), dueAt: formData.get("dueAt"),
+    assignedTo: formData.get("assignedTo"), quantity: formData.get("quantity"),
+    unit: formData.get("unit"), category: formData.get("category")
+  });
+  if (!parsed.success) redirect("/?error=Bitte+die+Eintragsdaten+pruefen.");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { data: list } = await supabase.from("lists").select("id,workspace_id,kind").eq("id", parsed.data.listId).single();
+  if (!list || list.kind !== parsed.data.kind) redirect("/");
+  const { error } = await supabase.from("list_entries").update({
+    title: parsed.data.title,
+    notes: parsed.data.notes || null,
+    priority: parsed.data.priority,
+    due_at: parsed.data.dueAt ? new Date(`${parsed.data.dueAt}T12:00:00.000Z`).toISOString() : null,
+    assigned_to: parsed.data.assignedTo ?? null,
+    quantity: parsed.data.quantity ?? null,
+    unit: parsed.data.unit || null,
+    category: parsed.data.category || null
+  }).eq("id", id).eq("list_id", list.id);
+  if (error) redirect(`/w/${list.workspace_id}/lists/${list.id}?error=Eintrag+konnte+nicht+aktualisiert+werden.`);
+  revalidatePath(`/w/${list.workspace_id}/lists/${list.id}`);
 }
