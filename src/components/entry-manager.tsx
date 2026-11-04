@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { Check, Circle, GripVertical, Trash2, ChevronUp, ChevronDown, Undo2 } from "lucide-react";
 import { addEntrySmart, confirmDuplicateQuantity, saveEntryOrder, toggleEntry, deleteEntry, updateEntry } from "@/lib/actions";
 
@@ -10,6 +10,7 @@ type Props = { listId:string; kind:"tasks"|"shopping"|"mixed"; entries:Entry[]; 
 
 export function EntryManager({listId,kind,entries:initialEntries,profiles}:Props) {
   const [entries,setEntries]=useState(initialEntries);
+  useEffect(()=>setEntries(initialEntries),[initialEntries]);
   const [filter,setFilter]=useState("all");
   const [sort,setSort]=useState("manual");
   const [query,setQuery]=useState("");
@@ -86,7 +87,7 @@ export function EntryManager({listId,kind,entries:initialEntries,profiles}:Props
       <div className="entry-copy"><span>{entry.title}</span>{entry.notes&&<small>{entry.notes}</small>}{shopping&&(entry.quantity||entry.unit)&&<small>{entry.quantity??1} {entry.unit??""}</small>}{shopping&&entry.category&&<small>{entry.category}</small>}{!shopping&&entry.due_at&&<small>Fällig: {new Date(entry.due_at).toLocaleDateString("de-DE")}</small>}{entry.assigned_to&&<small>→ {profiles.find(p=>p.user_id===entry.assigned_to)?.display_name??"Mitglied"}</small>}</div>
       {entry.priority!=="normal"&&!shopping&&<span className={`priority priority-${entry.priority}`}>{entry.priority==="urgent"?"Dringend":entry.priority==="high"?"Hoch":"Niedrig"}</span>}
       <div className="order-actions"><button type="button" aria-label="Nach oben" onClick={()=>move(entry.id,-1)}><ChevronUp size={15}/></button><button type="button" aria-label="Nach unten" onClick={()=>move(entry.id,1)}><ChevronDown size={15}/></button></div>
-      <details className="entry-edit"><summary>Bearbeiten</summary><form action={updateEntry} className="entry-edit-form"><input type="hidden" name="id" value={entry.id}/><input type="hidden" name="listId" value={listId}/><input type="hidden" name="kind" value={kind}/><label>Titel<input name="title" defaultValue={entry.title} maxLength={240} required/></label><label>Notiz<input name="notes" defaultValue={entry.notes??""}/></label>{shopping&&<div className="edit-field-row"><label>Menge<input name="quantity" type="number" min="0.01" step="0.01" defaultValue={entry.quantity??1}/></label><label>Einheit<input name="unit" defaultValue={entry.unit??""}/></label><label>Kategorie<input name="category" defaultValue={entry.category??""}/></label></div>}<button className="button button-secondary" type="submit">Speichern</button></form></details>
+      <details className="entry-edit"><summary>Bearbeiten</summary><form action={updateEntry} className="entry-edit-form"><input type="hidden" name="id" value={entry.id}/><input type="hidden" name="listId" value={listId}/><input type="hidden" name="kind" value={kind}/><label>Titel<input name="title" defaultValue={entry.title} maxLength={240} required/></label><label>Notiz<input name="notes" defaultValue={entry.notes??""}/></label>{shopping&&<div className="edit-field-row"><label>Menge<input name="quantity" type="number" min="0.01" step="0.01" defaultValue={entry.quantity??1}/></label><label>Einheit<input name="unit" defaultValue={entry.unit??""}/></label><label>Kategorie<input name="category" defaultValue={entry.category??""}/></label></div>}{(!shopping||kind==="mixed")&&<div className="edit-field-row"><label>Priorität<select name="priority" defaultValue={entry.priority}><option value="low">Niedrig</option><option value="normal">Normal</option><option value="high">Hoch</option><option value="urgent">Dringend</option></select></label><label>Fällig am<input name="dueAt" type="date" defaultValue={entry.due_at?entry.due_at.slice(0,10):""}/></label></div>}<label>Zuständig<select name="assignedTo" defaultValue={entry.assigned_to??""}><option value="">Nicht zugewiesen</option>{profiles.map(p=><option key={p.user_id} value={p.user_id}>{p.display_name}</option>)}</select></label><button className="button button-secondary" type="submit">Speichern</button></form></details>
       <form action={deleteEntry}><input type="hidden" name="id" value={entry.id}/><button className="icon-button" aria-label="Eintrag löschen"><Trash2 size={16}/></button></form>
     </div>)}</div>
     {!visible.length&&<div className="empty-state compact"><p>Keine passenden Einträge gefunden.</p></div>}
