@@ -139,7 +139,11 @@ language plpgsql
 set search_path = ''
 as $$
 begin
-  if tg_table_name = 'lists' then
+  if tg_table_name = 'workspaces' then
+    if new.created_by is distinct from old.created_by then
+      raise exception 'Workspace creator cannot be changed' using errcode = '42501';
+    end if;
+  elsif tg_table_name = 'lists' then
     if new.workspace_id is distinct from old.workspace_id or new.created_by is distinct from old.created_by then
       raise exception 'Workspace and creator cannot be changed' using errcode = '42501';
     end if;
@@ -151,6 +155,10 @@ begin
   return new;
 end;
 $$;
+
+create trigger workspaces_prevent_creator_reassignment
+before update on public.workspaces
+for each row execute function private.prevent_tenant_reassignment();
 
 create trigger lists_prevent_tenant_reassignment
 before update on public.lists
@@ -169,7 +177,10 @@ set search_path = ''
 as $$
 begin
   if tg_op = 'DELETE' then
-    if old.role = 'owner' then
+    -- Allow the FK cascade when the whole workspace is being deleted.
+    if old.role = 'owner' and exists (
+      select 1 from public.workspaces w where w.id = old.workspace_id
+    ) then
       raise exception 'Workspace owner must be transferred explicitly' using errcode = '42501';
     end if;
     return old;
