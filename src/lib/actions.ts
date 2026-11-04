@@ -169,3 +169,30 @@ export async function acceptInvitation(token: string) {
   revalidatePath("/");
   redirect(`/w/${workspaceId}`);
 }
+
+
+export async function requestPasswordReset(formData: FormData) {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!z.email().safeParse(email).success) redirect("/login/reset?error=Bitte+eine+gueltige+E-Mail-Adresse+eingeben.");
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl) redirect("/login/reset?error=Die+App-Adresse+ist+nicht+konfiguriert.");
+  const supabase = await createClient();
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${siteUrl}/auth/callback?next=/account/update-password`
+  });
+  redirect("/login/reset?message=Wenn+ein+Konto+existiert,+wurde+eine+E-Mail+zum+Zuruecksetzen+versendet.");
+}
+
+export async function updatePassword(formData: FormData) {
+  const password = String(formData.get("password") ?? "");
+  const confirmation = String(formData.get("confirmation") ?? "");
+  if (password.length < 10 || password.length > 128 || password !== confirmation) {
+    redirect("/account/update-password?error=Passwoerter+muessen+uebereinstimmen+und+mindestens+10+Zeichen+haben.");
+  }
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) redirect("/account/update-password?error=Das+Passwort+konnte+nicht+geaendert+werden.");
+  redirect("/?message=Passwort+erfolgreich+geaendert.");
+}
