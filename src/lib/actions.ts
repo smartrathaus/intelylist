@@ -26,13 +26,14 @@ export async function signUp(formData: FormData) {
   const next = safeInternalPath(String(formData.get("next") ?? "/"));
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
+  const displayName = String(formData.get("displayName") ?? "").trim().slice(0, 80);
   if (!z.email().safeParse(email).success || password.length < 10) {
     redirect("/login?error=Bitte+eine+gueltige+E-Mail+und+mindestens+10+Zeichen+verwenden.");
   }
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email, password,
-    options: { emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent(next)}` : undefined }
+    options: { data: { display_name: displayName || undefined }, emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent(next)}` : undefined }
   });
   if (error) redirect("/login?error=Registrierung+nicht+moeglich.+Bitte+spaeter+erneut+versuchen.");
   redirect("/login?message=Bitte+pruefe+dein+Postfach+und+bestaetige+deine+E-Mail.");
@@ -76,7 +77,9 @@ export async function createList(formData: FormData) {
 
 export async function createEntry(formData: FormData) {
   const parsed = entrySchema.safeParse({
-    listId: formData.get("listId"), title: formData.get("title"), kind: formData.get("kind")
+    listId: formData.get("listId"), title: formData.get("title"), kind: formData.get("kind"),
+    priority: formData.get("priority"), dueAt: formData.get("dueAt"), assignedTo: formData.get("assignedTo"),
+    quantity: formData.get("quantity"), unit: formData.get("unit"), category: formData.get("category")
   });
   if (!parsed.success) redirect("/?error=Bitte+einen+gueltigen+Eintrag+eingeben.");
   const supabase = await createClient();
@@ -85,7 +88,13 @@ export async function createEntry(formData: FormData) {
   const { data: list } = await supabase.from("lists").select("id,workspace_id,kind").eq("id", parsed.data.listId).single();
   if (!list || list.kind !== parsed.data.kind) redirect("/");
   const { error } = await supabase.from("list_entries").insert({
-    list_id: list.id, title: parsed.data.title, created_by: user.id
+    list_id: list.id, title: parsed.data.title, created_by: user.id,
+    priority: parsed.data.priority,
+    due_at: parsed.data.dueAt ? new Date(`${parsed.data.dueAt}T12:00:00.000Z`).toISOString() : null,
+    assigned_to: parsed.data.assignedTo ?? null,
+    quantity: parsed.data.quantity ?? null,
+    unit: parsed.data.unit || null,
+    category: parsed.data.category || null
   });
   if (error) redirect(`/w/${list.workspace_id}/lists/${list.id}?error=Eintrag+konnte+nicht+gespeichert+werden.`);
   revalidatePath(`/w/${list.workspace_id}/lists/${list.id}`);
