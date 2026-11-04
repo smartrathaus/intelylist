@@ -3,35 +3,32 @@
 ## Leitidee
 intelylist ist eine gemeinsame Plattform für alltägliche Organisation. Einkäufe und allgemeine Aufgaben nutzen dieselbe Zusammenarbeitsschicht: Nutzer arbeiten in gemeinsamen Bereichen, sehen Änderungen zeitnah und verteilen Verantwortlichkeiten.
 
-## Zielgruppen
-- Familien und private Haushalte
-- Wohngemeinschaften und Paare
-- Private Gruppen
-- Kleine Teams und Vereine (vorbehaltlich späterer Tarif- und Datenschutzprüfung)
+## Zielgruppe
+Private Nutzung im kleinen Kreis: Familie, Freunde, Paare und Wohngemeinschaften. Ein öffentliches kommerzielles SaaS ist nicht geplant.
 
-## Workspaces
-Ein Workspace ist ein gemeinsamer Bereich, beispielsweise „Zuhause“, „WG“ oder „Vereinsfest“. Ein Nutzer kann mehreren Workspaces angehören. Daten sind nur für Mitglieder sichtbar.
+## Bereiche und Rollen
+Ein Bereich (Workspace) ist ein gemeinsamer Raum, beispielsweise „Zuhause“, „Urlaub“ oder „WG“. Ein Nutzer kann mehreren Bereichen angehören. Daten sind ausschließlich für Mitglieder sichtbar.
 
-Rollen zum Start:
-- Owner: verwaltet Workspace, Einstellungen und Mitglieder.
-- Admin: verwaltet Listen und Mitglieder im Rahmen seiner Berechtigungen.
-- Member: erstellt und bearbeitet Inhalte.
+- **Owner:** verwaltet Bereich und Mitglieder; es gibt genau einen initialen Owner.
+- **Admin:** unterstützt die Verwaltung im Rahmen klar begrenzter Rechte.
+- **Member:** erstellt und bearbeitet Listen und Einträge.
 
-## Listen und Einträge
-Listen haben den Typ tasks, shopping oder mixed. Einträge verwenden ein gemeinsames Modell mit Titel, Beschreibung, Status, Priorität, Zuständigkeit, Fälligkeit und Sortierung. Einkaufsfelder wie Menge, Einheit und Kategorie sind optional.
+Rollenwechsel und Einladungen müssen serverseitig und transaktional umgesetzt werden; die Datenbankgrundlage ist hierfür noch nicht vollständig.
 
-## Ausbaustufen
-### Stufe 1 – Basisversion
-Registrierung, Login, Passwort-Reset, Workspaces, Einladungen, Rollen, Aufgaben- und Einkaufslisten, Einträge erstellen/bearbeiten/löschen/abhaken, Aufgaben zuweisen, Fälligkeiten und Echtzeit-Synchronisierung.
+## Module
+- **Aufgaben:** Titel, Beschreibung, Status, Priorität, Zuständigkeit und Fälligkeit.
+- **Einkauf:** Artikel, Menge, Einheit, Kategorie und Erledigt-Status.
+- **Gemischte Listen:** Aufgaben und Einkaufspositionen können gemeinsam geführt werden.
 
-### Stufe 2 – Alltagserleichterung
-Prioritäten, Kategorien, wiederkehrende Aufgaben, Vorlagen, Listen duplizieren, Verlauf, Benachrichtigungen und Offline-Grundfunktionen.
+## Umsetzungsstand
+### Angelegt
+Dashboard/Bereichsauswahl, Auth-Grundablauf, Bereiche und Listen anlegen, Listeneinträge hinzufügen/abhaken/löschen, Realtime-Grundintegration und initiale RLS-Migrationen.
 
-### Stufe 3 – intelligente Funktionen
-Barcode-Erfassung, Produktdaten, Preisvergleich, Aufgabenplanung, Statistiken und optionale KI-Vorschläge.
+### Noch umzusetzen für Version 1
+Einladungen samt sicherer Annahme, Mitgliederverwaltung, Passwort-Reset, Bearbeiten aller Eintragsfelder, Zuweisungen, Fälligkeiten, Kategorien, Mengen/Einheiten im Formular, leere Zustände/Fehlermeldungen vervollständigen, PWA-Installationsdetails, Browser- und Barrierefreiheitstests.
 
-## Nicht in Version 1
-Native iOS-/Android-Apps, komplexes Enterprise-Projektmanagement, kostenpflichtige Produktdatenbanken und kostenpflichtige KI-Dienste.
+### Nicht in Version 1
+Native iOS-/Android-Apps, komplexes Enterprise-Projektmanagement, kostenpflichtige Produktdatenbanken und KI-Dienste.
 
 ## UX-Leitlinien
 Premium, minimalistisch, ruhig und übersichtlich; mobile-first, barrierebewusst und mit wenigen Schritten für häufige Aktionen.
