@@ -16,9 +16,10 @@ export const entrySchema = z.object({
   priority: z.preprocess(emptyToUndefined, z.enum(["low", "normal", "high", "urgent"]).default("normal")),
   dueAt: z.preprocess(emptyToUndefined, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => { const date = new Date(value + "T00:00:00.000Z"); return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value; }).optional()),
   assignedTo: z.preprocess(emptyToUndefined, z.string().uuid().optional()),
-  quantity: z.preprocess(emptyToUndefined, z.coerce.number().positive().max(100000).optional()),
+  quantity: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).max(100000).optional()),
   unit: z.preprocess(emptyToUndefined, z.string().trim().max(32).optional()),
-  category: z.preprocess(emptyToUndefined, z.string().trim().max(80).optional())
+  category: z.preprocess(emptyToUndefined, z.string().trim().max(80).optional()),
+  supermarket: z.preprocess(emptyToUndefined, z.string().trim().max(100).optional())
 });
 export const credentialsSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
