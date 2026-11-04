@@ -374,7 +374,9 @@ export async function addEntrySmart(input: { listId: string; title: string; kind
     const existing = (candidates ?? []).find(row => row.title.trim().toLocaleLowerCase() === parsed.data.title.trim().toLocaleLowerCase());
     if (existing) return { ok: true, duplicate: { id: existing.id, title: existing.title, quantity: Number(existing.quantity ?? 1) } };
   }
-  const { error } = await supabase.from("list_entries").insert({ list_id: list.id, title: parsed.data.title, created_by: user.id, quantity, unit: parsed.data.unit || null, priority: "normal" });
+  const { data: lastEntry } = await supabase.from("list_entries").select("position").eq("list_id", list.id).order("position", { ascending: false }).limit(1).maybeSingle();
+  const nextPosition = (lastEntry?.position ?? -1) + 1;
+  const { error } = await supabase.from("list_entries").insert({ list_id: list.id, title: parsed.data.title, created_by: user.id, quantity, unit: parsed.data.unit || null, priority: "normal", position: nextPosition });
   if (error) return { ok: false, message: "Der Eintrag konnte nicht gespeichert werden." };
   revalidatePath(`/w/${list.workspace_id}/lists/${list.id}`);
   return { ok: true };
