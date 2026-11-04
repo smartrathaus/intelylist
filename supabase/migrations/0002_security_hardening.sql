@@ -168,12 +168,16 @@ security definer
 set search_path = ''
 as $$
 begin
-  if old.role = 'owner' and (
-    tg_op = 'DELETE' or new.role is distinct from old.role
-  ) then
+  if tg_op = 'DELETE' then
+    if old.role = 'owner' then
+      raise exception 'Workspace owner must be transferred explicitly' using errcode = '42501';
+    end if;
+    return old;
+  end if;
+  if old.role = 'owner' and new.role is distinct from old.role then
     raise exception 'Workspace owner must be transferred explicitly' using errcode = '42501';
   end if;
-  return case when tg_op = 'DELETE' then old else new end;
+  return new;
 end;
 $$;
 
@@ -233,3 +237,22 @@ create trigger lists_set_updated_at before update on public.lists
 for each row execute function private.set_updated_at();
 create trigger entries_set_updated_at before update on public.list_entries
 for each row execute function private.set_updated_at();
+
+-- Members may remove individual entries; list and workspace administration remains role-restricted.
+create policy "members delete entries" on public.list_entries
+for delete to authenticated using (
+  exists (select 1 from public.lists l where l.id = list_id and (select private.is_workspace_member(l.workspace_id)))
+);
+
+-- Enable database change broadcasts for collaborative lists when the standard Supabase publication exists.
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+     and not exists (
+       select 1 from pg_publication_tables
+       where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'list_entries'
+     ) then
+    alter publication supabase_realtime add table public.list_entries;
+  end if;
+end;
+$$;
