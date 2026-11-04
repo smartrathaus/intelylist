@@ -24,7 +24,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         <p>Dein Konto und dein Profil werden entfernt. Deine Mitgliedschaften und persönlichen Einladungen werden gelöscht. Von dir erstellte Listen und Einträge bleiben für die anderen Mitglieder erhalten; deine Urheberschaft wird anonymisiert.</p>
         {owned > 0 && <p className="notice notice-error">Du bist noch Inhaber von {owned} Bereich(en). Lösche diese Bereiche zuerst. Eine Übertragung der Inhaberschaft ist derzeit nicht möglich.</p>}
         {error && <p className="notice notice-error">{error}</p>}
-        <form action={deleteOwnAccount} className="account-delete-form"><label>Zur Bestätigung KONTO LÖSCHEN eingeben<input name="confirmation" autoComplete="off" required/></label><button className="button button-danger" type="submit" disabled={owned > 0}>Konto endgültig löschen</button></form>
+        <form action={deleteOwnAccount} className="account-delete-form"><label>Aktuelles Passwort<input name="currentPassword" type="password" autoComplete="current-password" required/></label><label>Zur Bestätigung KONTO LÖSCHEN eingeben<input name="confirmation" autoComplete="off" required/></label><button className="button button-danger" type="submit" disabled={owned > 0}>Konto endgültig löschen</button></form>
       </section>
     </section>
   </main>;

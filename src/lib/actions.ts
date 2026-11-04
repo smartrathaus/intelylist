@@ -311,7 +311,17 @@ export async function deleteOwnAccount(formData: FormData) {
   }
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user?.email) redirect("/login");
+  const currentPassword = String(formData.get("currentPassword") ?? "");
+  if (currentPassword.length < 8 || currentPassword.length > 128) {
+    redirect("/account?error=Bitte+dein+aktuelles+Passwort+eingeben.");
+  }
+  const { data: verified, error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email, password: currentPassword
+  });
+  if (verifyError || verified.user?.id !== user.id) {
+    redirect("/account?error=Das+aktuelle+Passwort+ist+nicht+korrekt.");
+  }
 
   const { data: memberships } = await supabase.from("workspace_members")
     .select("workspace_id,role").eq("user_id", user.id);
