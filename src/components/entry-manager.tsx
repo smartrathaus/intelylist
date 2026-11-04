@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { Check, Circle, GripVertical, Trash2, ChevronUp, ChevronDown, Undo2, Plus, Minus, Search } from "lucide-react";
-import { addEntrySmart, confirmDuplicateQuantity, saveEntryOrder, toggleEntry, deleteEntry, updateEntry, setEntryQuantity } from "@/lib/actions";
+import { addEntrySmart, confirmDuplicateQuantity, saveEntryOrder, toggleEntry, deleteEntry, updateEntry, setEntryQuantity, startNewShoppingRun } from "@/lib/actions";
 
 type Entry = { id:string; title:string; notes:string|null; is_completed:boolean; priority:string; due_at:string|null; quantity:number|null; unit:string|null; category:string|null; supermarket:string|null; assigned_to:string|null; created_at:string };
 type Profile = { user_id:string; display_name:string };
@@ -86,6 +86,12 @@ export function EntryManager({listId,kind,entries:initialEntries,profiles,histor
     const result=await setEntryQuantity({entryId:entry.id,quantity:next});
     if(!result.ok){setEntries(rows=>rows.map(e=>e.id===entry.id?{...e,quantity:entry.quantity??1}:e));setMessage(result.message);}
   }
+  async function startNextShoppingRun(){
+    if(!window.confirm("Alle abgehakten Artikel wieder öffnen und einen neuen Einkauf beginnen?"))return;
+    const result=await startNewShoppingRun(listId);
+    if(result.ok){setEntries(rows=>rows.map(e=>({...e,is_completed:false})));setFilter("open");setMessage("Neuer Einkauf gestartet. Die bisherige Laufweghistorie bleibt gespeichert.");}
+    else setMessage(result.message);
+  }
   async function undoLast(){
     if(!undo)return;const data=new FormData();data.set("id",undo.id);data.set("completed",String(undo.completed));
     await toggleEntry(data);setEntries(rows=>rows.map(e=>e.id===undo.id?{...e,is_completed:undo.completed}:e));setUndo(null);setMessage("Letzte Änderung rückgängig gemacht.");
@@ -103,7 +109,7 @@ export function EntryManager({listId,kind,entries:initialEntries,profiles,histor
       <label className="search-field"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Suchen…" aria-label="Liste durchsuchen"/></label>
       <select value={filter} onChange={e=>setFilter(e.target.value)} aria-label="Statusfilter"><option value="open">Offen</option><option value="done">Erledigt</option><option value="all">Alle</option><option value="overdue">Überfällig</option></select>
       <select value={sort} onChange={e=>setSort(e.target.value)} aria-label="Sortieren"><option value="manual">Manuelle Reihenfolge</option><option value="status">Status: offen zuerst</option>{shopping&&<><option value="habit">Mein üblicher Einkaufsweg</option><option value="store">Nach Supermarkt</option></>}<option value="alpha">Alphabetisch</option><option value="priority">Priorität</option><option value="due">Fälligkeit</option><option value="created">Neueste zuerst</option></select>
-      {undo&&<button className="button button-secondary button-small" onClick={undoLast}><Undo2 size={14}/> Rückgängig</button>}
+      {undo&&<button className="button button-secondary button-small" onClick={undoLast}><Undo2 size={14}/> Rückgängig</button>}{shopping&&entries.some(e=>e.is_completed)&&<button className="button button-secondary button-small" onClick={startNextShoppingRun}>Neuen Einkauf starten</button>}
     </div>
     {sort==="habit"&&shopping&&<p className="list-hint">Die Reihenfolge basiert auf den letzten fünf gespeicherten Einkaufsdurchläufen. Bei neuen Artikeln wird der Name als Fallback verwendet.</p>}
     {message&&<p className="notice notice-success" role="status">{message}</p>}
