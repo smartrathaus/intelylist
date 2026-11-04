@@ -22,7 +22,7 @@ Ein Nutzer sieht Daten nur, wenn er Mitglied des zugehörigen Workspaces ist. Li
 7. Der Service-Role-/Secret-Key wird nicht im Browser verwendet.
 
 ## Noch notwendige Sicherheitsarbeit vor Livegang
-- Rollenwechsel, Mitgliederaustritt und Einladungsannahme als eng begrenzte, getestete Datenbankfunktionen umsetzen.
+- Rollenwechsel, Mitgliederentfernung und Einladungsannahme sind als eng begrenzte Datenbankfunktionen umgesetzt; deren Verhalten muss noch mit vollständigen RLS- und Integrationstests abgesichert werden.
 - Vollständige pgTAP-Tests mit mindestens zwei getrennten Workspaces und erlaubten/verbotenen Zugriffen für Owner, Admin, Member und Nichtmitglieder.
 - Einladungs-Token kryptografisch zufällig erzeugen, nur gehasht speichern, kurz befristen und einmalig einlösbar machen.
 - Passwort-Reset, E-Mail-Änderungen, Session-Ablauf und Kontolöschung testen.
