@@ -17,3 +17,22 @@
 
 .list-toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0 16px}.list-toolbar input{flex:1;min-width:170px}.list-toolbar select{min-width:150px}.drag-handle{display:grid;place-items:center;color:#aab4ac;cursor:grab;touch-action:none}.order-actions{display:flex;flex-direction:column;gap:1px}.order-actions button{display:grid;place-items:center;border:0;background:transparent;color:#849188;padding:3px;border-radius:5px}.order-actions button:hover{background:#edf2ee;color:var(--green)}.list-hint{font-size:11px;color:var(--muted);margin:10px 2px}.entry-manager .entry-form{margin-bottom:14px}.entry-manager .notice{margin-top:10px}.entry-row[draggable="true"]{cursor:default}.entry-row:has(.drag-handle:active){opacity:.72}
 @media(max-width:700px){.list-toolbar{display:grid;grid-template-columns:1fr 1fr}.list-toolbar input{grid-column:1/-1;width:100%;min-width:0}.list-toolbar select{min-width:0;width:100%}.order-actions{flex-direction:row}.drag-handle{display:none}.entry-row{gap:8px}.entry-edit summary{padding:6px}}
+
+/* intelylist brand palette: deep navy, teal, clear blue and warm amber */
+:root{--bg:#f5f8fa;--surface:#fff;--ink:#142d4b;--muted:#71808d;--line:#e3eaf0;--green:#299f98;--green-dark:#20857f;--green-soft:#e5f5f3;--mint:#ccebe6;--amber:#e5a52f;--red:#bd5555;--shadow:0 12px 36px rgba(20,45,75,.07)}
+html{background:var(--bg)}
+.topbar{background:rgba(255,255,255,.9)}
+.brand-logo{display:block;width:142px;height:62px;object-fit:contain}
+.auth-logo{display:block;width:218px;height:170px;object-fit:contain;object-position:left center}
+.brand-mark,.workspace-icon,.create-icon,.empty-icon,.member-avatar{background:var(--green-soft);color:var(--green)}
+.button-primary{background:var(--green);color:#fff}.button-primary:hover{background:var(--green-dark)}
+.button-secondary{background:var(--green-soft);color:var(--green)}.button-secondary:hover{background:#d3eeea}
+.count-pill{background:var(--green-soft);color:var(--green)}
+.summary-chip{color:var(--green)}
+.eyebrow{color:var(--green)}
+input:focus,select:focus{border-color:#75c9c1;box-shadow:0 0 0 3px rgba(41,159,152,.12)}
+.workspace-card:hover,.list-card:hover{border-color:#b8dfdb}
+.create-panel{border-color:#b9dcd8}
+.auth-shell{background:radial-gradient(ellipse at 50% 0%,#e3f5f2 0%,var(--bg) 60%)}
+.notice-success{background:#e5f5f3;color:#247f79}
+.list-icon.shopping,.priority-high{background:#fff4df;color:#a86c12}
