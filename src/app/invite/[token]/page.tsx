@@ -11,7 +11,7 @@ export default async function InvitationPage({ params, searchParams }: { params:
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   return <main className="auth-shell"><section className="auth-card">
-    <div className="brand auth-brand"><span className="brand-mark"><Layers3 size={20}/></span><span>intelylist</span></div>
+    <div className="brand auth-brand"><img className="auth-logo" src="/intelylist-logo.svg" alt="intelylist – Intelligente Aufgabenverwaltung"/></div>
     <p className="eyebrow">EINLADUNG</p><h1 className="invite-title">Du wurdest eingeladen.</h1>
     <p className="muted">Mit dieser Einladung erhältst du Zugriff auf einen gemeinsamen Bereich. Der Link ist sieben Tage gültig und an die eingeladene E-Mail-Adresse gebunden.</p>
     {error && <p className="notice notice-error">{error}</p>}
