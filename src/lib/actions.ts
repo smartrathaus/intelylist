@@ -235,3 +235,37 @@ export async function updateEntry(formData: FormData) {
   if (error) redirect(`/w/${list.workspace_id}/lists/${list.id}?error=Eintrag+konnte+nicht+aktualisiert+werden.`);
   revalidatePath(`/w/${list.workspace_id}/lists/${list.id}`);
 }
+
+
+export async function changeMemberRole(formData: FormData) {
+  const workspaceId = String(formData.get("workspaceId") ?? "");
+  const targetUser = String(formData.get("targetUser") ?? "");
+  const role = String(formData.get("role") ?? "");
+  if (!z.uuid().safeParse(workspaceId).success || !z.uuid().safeParse(targetUser).success || !["member", "admin"].includes(role)) {
+    redirect("/");
+  }
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { error } = await supabase.rpc("change_workspace_member_role", {
+    target_workspace: workspaceId, target_user: targetUser, new_role: role
+  });
+  if (error) redirect(`/w/${workspaceId}?error=Die+Rolle+konnte+nicht+geaendert+werden.`);
+  revalidatePath(`/w/${workspaceId}`);
+  redirect(`/w/${workspaceId}?message=Mitgliedsrolle+aktualisiert.`);
+}
+
+export async function removeWorkspaceMember(formData: FormData) {
+  const workspaceId = String(formData.get("workspaceId") ?? "");
+  const targetUser = String(formData.get("targetUser") ?? "");
+  if (!z.uuid().safeParse(workspaceId).success || !z.uuid().safeParse(targetUser).success) redirect("/");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { error } = await supabase.rpc("remove_workspace_member", {
+    target_workspace: workspaceId, target_user: targetUser
+  });
+  if (error) redirect(`/w/${workspaceId}?error=Mitglied+konnte+nicht+entfernt+werden.`);
+  revalidatePath(`/w/${workspaceId}`);
+  redirect(`/w/${workspaceId}?message=Mitglied+aus+dem+Bereich+entfernt.`);
+}
