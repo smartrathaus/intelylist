@@ -6,7 +6,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const params = await searchParams;
   return <main className="auth-shell">
     <section className="auth-card">
-      <div className="brand auth-brand"><span className="brand-mark"><Layers3 size={20}/></span><span>intelylist</span></div>
+      <div className="brand auth-brand"><img className="auth-logo" src="/intelylist-logo.svg" alt="intelylist – Intelligente Aufgabenverwaltung"/></div>
       <div className="auth-intro"><p className="eyebrow">GEMEINSAM ORGANISIEREN</p><h1>Alles im Blick.<br/>Gemeinsam erledigt.</h1><p className="muted">Deine Bereiche, Aufgaben und Einkaufslisten an einem Ort.</p></div>
       {params.error && <p className="notice notice-error">{params.error}</p>}
       {params.message && <p className="notice notice-success">{params.message}</p>}
