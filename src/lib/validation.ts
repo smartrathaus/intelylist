@@ -12,6 +12,6 @@ export const entrySchema = z.object({
   kind: z.enum(["tasks", "shopping", "mixed"])
 });
 export const credentialsSchema = z.object({
-  email: z.email().transform((value) => value.trim().toLowerCase()),
+  email: z.string().trim().toLowerCase().pipe(z.email()),
   password: z.string().min(8).max(128)
 });
