@@ -363,7 +363,7 @@ export async function deleteOwnAccount(formData: FormData) {
 
 export type QuickEntryResult = { ok: true; duplicate?: { id: string; title: string; quantity: number } } | { ok: false; message: string };
 
-export async function addEntrySmart(input: { listId: string; title: string; kind: "tasks" | "shopping" | "mixed"; quantity?: number; unit?: string }) : Promise<QuickEntryResult> {
+export async function addEntrySmart(input: { listId: string; title: string; kind: "tasks" | "shopping" | "mixed"; quantity?: number; unit?: string; supermarket?: string }) : Promise<QuickEntryResult> {
   const parsed = z.object({ listId: z.uuid(), title: z.string().trim().min(1).max(240), kind: z.enum(["tasks","shopping","mixed"]), quantity: z.number().int().min(1).max(100000).optional(), unit: z.string().max(32).optional(), supermarket: z.string().max(100).optional() }).safeParse(input);
   if (!parsed.success) return { ok: false, message: "Bitte prüfe den Eintrag." };
   const supabase = await createClient();
@@ -374,8 +374,8 @@ export async function addEntrySmart(input: { listId: string; title: string; kind
   const isShopping = list.kind === "shopping" || list.kind === "mixed";
   const quantity = isShopping ? (parsed.data.quantity ?? 1) : null;
   if (isShopping) {
-    const { data: candidates } = await supabase.from("list_entries").select("id,title,quantity").eq("list_id", list.id);
-    const existing = (candidates ?? []).find(row => row.title.trim().toLocaleLowerCase() === parsed.data.title.trim().toLocaleLowerCase());
+    const { data: candidates } = await supabase.from("list_entries").select("id,title,quantity,supermarket").eq("list_id", list.id);
+    const existing = (candidates ?? []).find(row => row.title.trim().toLocaleLowerCase() === parsed.data.title.trim().toLocaleLowerCase() && (row.supermarket ?? "").trim().toLocaleLowerCase() === (parsed.data.supermarket ?? "").trim().toLocaleLowerCase());
     if (existing) return { ok: true, duplicate: { id: existing.id, title: existing.title, quantity: Number(existing.quantity ?? 1) } };
   }
   const { data: lastEntry } = await supabase.from("list_entries").select("position").eq("list_id", list.id).order("position", { ascending: false }).limit(1).maybeSingle();
