@@ -269,3 +269,36 @@ export async function removeWorkspaceMember(formData: FormData) {
   revalidatePath(`/w/${workspaceId}`);
   redirect(`/w/${workspaceId}?message=Mitglied+aus+dem+Bereich+entfernt.`);
 }
+
+
+export async function leaveWorkspace(formData: FormData) {
+  const workspaceId = String(formData.get("workspaceId") ?? "");
+  const confirmation = String(formData.get("confirmation") ?? "");
+  if (!z.uuid().safeParse(workspaceId).success || confirmation !== "VERLASSEN") {
+    redirect(`/w/${workspaceId}?error=Bitte+den+Austritt+bestaetigen.`);
+  }
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { error } = await supabase.rpc("leave_workspace", { target_workspace: workspaceId });
+  if (error) redirect(`/w/${workspaceId}?error=Du+kannst+diesen+Bereich+nicht+verlassen.`);
+  revalidatePath("/");
+  redirect("/?message=Du+hast+den+Bereich+verlassen.");
+}
+
+export async function deleteWorkspace(formData: FormData) {
+  const workspaceId = String(formData.get("workspaceId") ?? "");
+  const confirmation = String(formData.get("confirmation") ?? "");
+  if (!z.uuid().safeParse(workspaceId).success) redirect("/");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { data: workspace } = await supabase.from("workspaces").select("id,name").eq("id", workspaceId).single();
+  if (!workspace || confirmation !== workspace.name) {
+    redirect(`/w/${workspaceId}?error=Bitte+den+Bereichsnamen+exakt+zur+Bestaetigung+eingeben.`);
+  }
+  const { error } = await supabase.from("workspaces").delete().eq("id", workspaceId);
+  if (error) redirect(`/w/${workspaceId}?error=Der+Bereich+konnte+nicht+geloescht+werden.`);
+  revalidatePath("/");
+  redirect("/?message=Der+Bereich+wurde+geloescht.");
+}

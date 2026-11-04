@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckSquare, Plus, ShoppingBasket, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { createList, changeMemberRole, removeWorkspaceMember } from "@/lib/actions";
+import { createList, changeMemberRole, removeWorkspaceMember, leaveWorkspace, deleteWorkspace } from "@/lib/actions";
 import { InvitePanel } from "@/components/invite-panel";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   return <main className="app-shell">
     <header className="topbar"><Link href="/" className="brand"><span className="brand-mark"><ArrowLeft size={18}/></span><span>Alle Bereiche</span></Link><span className="topbar-context">{workspace.name}</span></header>
     <section className="dashboard">
-      <p className="eyebrow">BEREICH</p><div className="welcome-row"><div><h1>{workspace.name}</h1><p className="muted">Hier laufen eure gemeinsamen Listen zusammen.</p></div><div className="summary-chip"><Users size={17}/>{members?.length ?? 1} Mitglieder</div></div>
+      <p className="eyebrow">BEREICH</p><div className="welcome-row"><div><h1>{workspace.name}</h1><p className="muted">Hier laufen eure gemeinsamen Listen zusammen.</p></div><div className="workspace-actions"><div className="summary-chip"><Users size={17}/>{members?.length ?? 1} Mitglieder</div><Link className="button button-secondary button-small" href={`/api/workspaces/${workspaceId}/export`}>JSON exportieren</Link></div></div>
       {query.error && <p className="notice notice-error">{query.error}</p>}{query.message && <p className="notice notice-success">{query.message}</p>}
       <div className="section-heading"><div><h2>Listen</h2><p className="muted">Wähle eine Liste oder erstelle eine neue.</p></div></div>
       {lists?.length ? <div className="list-grid">{lists.map((list) => <Link href={`/w/${workspaceId}/lists/${list.id}`} className="list-card" key={list.id}><div className={`list-icon ${list.kind === "shopping" ? "shopping" : ""}`}>{list.kind === "shopping" ? <ShoppingBasket size={21}/> : <CheckSquare size={21}/>}</div><div className="list-card-copy"><h3>{list.name}</h3><p>{list.kind === "shopping" ? "Einkaufsliste" : list.kind === "mixed" ? "Gemischte Liste" : "Aufgabenliste"}</p></div><ArrowRight size={18} className="workspace-arrow"/></Link>)}</div> : <div className="empty-state"><div className="empty-icon"><CheckSquare size={24}/></div><h3>Der erste Schritt ist eine Liste.</h3><p>Lege eine Aufgaben- oder Einkaufsliste für diesen Bereich an.</p></div>}
@@ -45,6 +45,9 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
         })}</div>
       </section>
       {(currentRole === "owner" || currentRole === "admin") && <InvitePanel workspaceId={workspaceId} canInviteAdmin={currentRole === "owner"}/> }
+      <section className="danger-zone">
+        {currentRole === "owner" ? <details><summary>Bereich endgültig löschen</summary><p>Alle Listen, Einträge und Mitgliedschaften dieses Bereichs werden unwiderruflich gelöscht.</p><form action={deleteWorkspace}><input type="hidden" name="workspaceId" value={workspaceId}/><label>Zur Bestätigung den Bereichsnamen <strong>{workspace.name}</strong> eingeben<input name="confirmation" autoComplete="off" required/></label><button className="button button-danger" type="submit">Bereich endgültig löschen</button></form></details> : <details><summary>Bereich verlassen</summary><p>Du verlierst den Zugriff auf diesen Bereich. Deine zugewiesenen Einträge werden freigegeben.</p><form action={leaveWorkspace}><input type="hidden" name="workspaceId" value={workspaceId}/><label>Zur Bestätigung VERLASSEN eingeben<input name="confirmation" autoComplete="off" required/></label><button className="button button-danger" type="submit">Bereich verlassen</button></form></details>}
+      </section>
       <section className="create-panel"><div><div className="create-icon"><Plus size={19}/></div><h3>Neue Liste anlegen</h3><p className="muted">Ihr könnt mehrere Listen pro Bereich führen.</p></div>
         <form action={createList} className="inline-form"><input type="hidden" name="workspaceId" value={workspaceId}/><input name="name" aria-label="Listenname" placeholder="Name der Liste" maxLength={120} required/><select name="kind" aria-label="Listentyp" defaultValue="tasks"><option value="tasks">Aufgaben</option><option value="shopping">Einkauf</option><option value="mixed">Gemischt</option></select><button className="button button-primary" type="submit">Erstellen <ArrowRight size={16}/></button></form>
       </section>
