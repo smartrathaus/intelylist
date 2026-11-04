@@ -90,7 +90,7 @@ export async function createEntry(formData: FormData) {
   const parsed = entrySchema.safeParse({
     listId: formData.get("listId"), title: formData.get("title"), kind: formData.get("kind"),
     notes: formData.get("notes"), priority: formData.get("priority"), dueAt: formData.get("dueAt"), assignedTo: formData.get("assignedTo"),
-    quantity: formData.get("quantity"), unit: formData.get("unit"), category: formData.get("category"), supermarket: formData.get("supermarket"), supermarket: formData.get("supermarket"), supermarket: formData.get("supermarket")
+    quantity: formData.get("quantity"), unit: formData.get("unit"), category: formData.get("category"), supermarket: formData.get("supermarket")
   });
   if (!parsed.success) redirect("/?error=Bitte+einen+gueltigen+Eintrag+eingeben.");
   const supabase = await createClient();
