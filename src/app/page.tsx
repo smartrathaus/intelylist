@@ -6,7 +6,7 @@ import { createWorkspace, signOut } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function Dashboard({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+export default async function Dashboard({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -34,7 +34,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <div><p className="eyebrow">DEIN ÜBERBLICK</p><h1>Guten Tag.</h1><p className="muted">Wähle einen Bereich und organisiert gemeinsam, was ansteht.</p></div>
         <div className="summary-chip"><CheckSquare size={17}/><span><strong>{openCount ?? 0}</strong> offene Einträge</span></div>
       </div>
-      {params.error && <p className="notice notice-error">{params.error}</p>}
+      {params.error && <p className="notice notice-error">{params.error}</p>}{params.message && <p className="notice notice-success">{params.message}</p>}
       <div className="section-heading"><div><h2>Deine Bereiche</h2><p className="muted">Gemeinsame Räume für Familie, Freunde und Alltag.</p></div><span className="count-pill">{workspaces.length}</span></div>
       {workspaces.length ? <div className="workspace-grid">{workspaces.map((w) => <Link className="workspace-card" href={`/w/${w.id}`} key={w.id}>
         <div className="workspace-icon"><Users size={20}/></div><div className="workspace-card-body"><h3>{w.name}</h3><p>{w.role === "owner" ? "Inhaberin / Inhaber" : w.role === "admin" ? "Administration" : "Mitglied"}</p></div><ArrowRight className="workspace-arrow" size={18}/>
