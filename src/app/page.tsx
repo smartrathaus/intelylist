@@ -26,7 +26,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
   return <main className="app-shell">
     <header className="topbar">
-      <Link href="/" className="brand"><span className="brand-mark"><Layers3 size={19}/></span><span>intelylist</span></Link>
+      <Link href="/" className="brand"><img className="brand-logo" src="/intelylist-logo.svg" alt="intelylist – Intelligente Aufgabenverwaltung"/></Link>
       <div className="topbar-right"><span className="user-email">{user.email}</span><Link href="/account" className="button button-ghost button-small">Konto</Link><form action={signOut}><button className="button button-ghost button-small">Abmelden</button></form></div>
     </header>
     <section className="dashboard">
