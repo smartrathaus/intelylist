@@ -131,7 +131,7 @@ begin
   select role into target_role from public.workspace_members
   where workspace_id = target_workspace and user_id = target_user;
 
-  if actor_role not in ('owner','admin') or actor_id is null then
+  if actor_id is null or actor_role is null or actor_role not in ('owner','admin') then
     raise exception 'Insufficient permissions' using errcode = '42501';
   end if;
   if target_user = actor_id or target_role is null or target_role = 'owner' then
