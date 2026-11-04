@@ -1,0 +1,1 @@
+create index if not exists shopping_order_history_entry_idx on public.shopping_order_history(entry_id);
