@@ -19,7 +19,7 @@ export async function signIn(formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) redirect("/login?error=Anmeldung+nicht+moeglich.+Bitte+Daten+pruefen.");
-  redirect("/");
+  redirect(next);
 }
 
 export async function signUp(formData: FormData) {\n  const next = safeInternalPath(String(formData.get("next") ?? "/"));
