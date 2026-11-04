@@ -1,8 +1,5 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  poweredByHeader: false,
-  experimental: { serverActions: { bodySizeLimit: "1mb" } }
-};
+const nextConfig: NextConfig = { poweredByHeader: false };
 
 export default nextConfig;
