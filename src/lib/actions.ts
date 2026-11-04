@@ -3,19 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { workspaceSchema, listSchema, entrySchema } from "@/lib/validation";
 import { createClient } from "@/lib/supabase/server";
-
-const workspaceSchema = z.object({ name: z.string().trim().min(1).max(100) });
-const listSchema = z.object({
-  workspaceId: z.string().uuid(),
-  name: z.string().trim().min(1).max(120),
-  kind: z.enum(["tasks", "shopping", "mixed"])
-});
-const entrySchema = z.object({
-  listId: z.string().uuid(),
-  title: z.string().trim().min(1).max(240),
-  kind: z.enum(["tasks", "shopping", "mixed"])
-});
 
 export async function signIn(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
