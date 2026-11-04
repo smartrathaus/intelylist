@@ -40,8 +40,8 @@ export default async function ListPage({ params, searchParams }: { params: Promi
       <div className="entry-list">{entries?.map((entry) => <div className={`entry-row ${entry.is_completed ? "is-complete" : ""}`} key={entry.id}>
         <form action={toggleEntry}><input type="hidden" name="id" value={entry.id}/><input type="hidden" name="completed" value={String(!entry.is_completed)}/><button className="check-button" aria-label={entry.is_completed ? "Als offen markieren" : "Als erledigt markieren"}><span>{entry.is_completed ? <Check size={14}/> : <Circle size={19}/>}</span></button></form>
         <div className="entry-copy"><span>{entry.title}</span>
-          {entry.notes ? <small>{entry.notes}</small> : null}{isShopping && (entry.quantity || entry.unit) ? <small>{entry.quantity ?? ""} {entry.unit ?? ""}</small> : null}
-          {isShopping && entry.category ? <small>{entry.category}</small> : null}
+          {entry.notes ? <small>{entry.notes}</small> : null}{(isShopping || isMixed) && (entry.quantity || entry.unit) ? <small>{entry.quantity ?? ""} {entry.unit ?? ""}</small> : null}
+          {(isShopping || isMixed) && entry.category ? <small>{entry.category}</small> : null}
           {!isShopping && entry.due_at ? <small>Fällig: {new Date(entry.due_at).toLocaleDateString("de-DE")}</small> : null}
           {entry.assigned_to ? <small>→ {(profiles ?? []).find(profile => profile.user_id === entry.assigned_to)?.display_name ?? "Mitglied"}</small> : null}
         </div>
