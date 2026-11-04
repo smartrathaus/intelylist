@@ -370,7 +370,8 @@ export async function addEntrySmart(input: { listId: string; title: string; kind
   const isShopping = list.kind === "shopping" || list.kind === "mixed";
   const quantity = isShopping ? (parsed.data.quantity ?? 1) : null;
   if (isShopping) {
-    const { data: existing } = await supabase.from("list_entries").select("id,title,quantity").eq("list_id", list.id).eq("is_completed", false).ilike("title", parsed.data.title).limit(1).maybeSingle();
+    const { data: candidates } = await supabase.from("list_entries").select("id,title,quantity").eq("list_id", list.id).eq("is_completed", false);
+    const existing = (candidates ?? []).find(row => row.title.trim().toLocaleLowerCase() === parsed.data.title.trim().toLocaleLowerCase());
     if (existing) return { ok: true, duplicate: { id: existing.id, title: existing.title, quantity: Number(existing.quantity ?? 1) } };
   }
   const { error } = await supabase.from("list_entries").insert({ list_id: list.id, title: parsed.data.title, created_by: user.id, quantity, unit: parsed.data.unit || null, priority: "normal" });
@@ -389,8 +390,10 @@ export async function confirmDuplicateQuantity(input: { listId: string; entryId:
   if (!entry || (entry.lists as unknown as {kind:string}).kind === "tasks") return { ok: false, message: "Der Eintrag ist nicht mehr verfügbar." };
   const current = Number(entry.quantity ?? 1);
   if (current !== parsed.data.expectedQuantity) return { ok: false, message: "Die Menge wurde zwischenzeitlich geändert. Bitte erneut versuchen." };
-  const { error } = await supabase.from("list_entries").update({ quantity: current + 1 }).eq("id", entry.id).eq("list_id", entry.list_id);
-  if (error) return { ok: false, message: "Die Menge konnte nicht erhöht werden." };
+  const { data: newQuantity, error } = await supabase.rpc("increment_list_entry_quantity", {
+    target_entry: entry.id, target_list: entry.list_id, expected_quantity: current
+  });
+  if (error || newQuantity === null) return { ok: false, message: "Die Menge konnte nicht erhöht werden. Bitte aktualisiere die Liste und versuche es erneut." };
   const workspaceId = (entry.lists as unknown as {workspace_id:string}).workspace_id;
   revalidatePath(`/w/${workspaceId}/lists/${entry.list_id}`);
   return { ok: true };
