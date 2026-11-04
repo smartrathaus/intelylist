@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(12);
+select plan(16);
 
 select has_table('public', 'workspaces', 'workspaces table exists');
 select has_table('public', 'workspace_members', 'workspace_members table exists');
@@ -18,6 +18,10 @@ select ok((select relrowsecurity from pg_class where oid = 'public.workspace_inv
 
 select ok(has_function_privilege('authenticated', 'private.is_workspace_member(uuid)', 'EXECUTE'), 'authenticated can call the RLS membership helper');
 select ok(not has_table_privilege('authenticated', 'public.workspace_members', 'UPDATE'), 'members cannot directly update membership roles');
+select ok(not has_table_privilege('authenticated', 'public.workspace_members', 'INSERT'), 'members cannot bypass invitation acceptance');
+select ok(not has_table_privilege('authenticated', 'public.workspace_members', 'DELETE'), 'members cannot directly delete memberships');
+select ok(has_function_privilege('authenticated', 'public.accept_workspace_invitation(text)', 'EXECUTE'), 'authenticated users can accept invitations through the checked RPC');
+select ok(not has_function_privilege('anon', 'public.accept_workspace_invitation(text)', 'EXECUTE'), 'anonymous users cannot accept invitations');
 
 select * from finish();
 rollback;
