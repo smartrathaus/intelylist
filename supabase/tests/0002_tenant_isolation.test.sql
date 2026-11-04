@@ -43,6 +43,7 @@ select is((select count(*)::integer from public.workspaces), 1, 'Alice sees only
 select is((select count(*)::integer from public.lists), 1, 'Alice sees only lists in her workspace');
 select is((select count(*)::integer from public.list_entries), 1, 'Alice sees only entries in her workspace');
 select is((select count(*)::integer from public.profiles where user_id = '22222222-2222-4222-8222-222222222222'), 0, 'Alice cannot see a profile outside her workspaces');
+select is((select count(*)::integer from public.profiles where user_id = '11111111-1111-4111-8111-111111111111'), 1, 'Alice can see her own profile');
 
 select lives_ok(
   $$insert into public.list_entries (list_id, title, created_by) values ('cccccccc-cccc-4ccc-8ccc-cccccccccccc', 'Allowed item', '11111111-1111-4111-8111-111111111111')$$,
