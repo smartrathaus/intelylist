@@ -21,6 +21,10 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Dependency audit summary
+        run: |
+          npm audit --json > npm-audit.json || true
+          node -e 'const r=require("./npm-audit.json"); console.log("AUDIT SUMMARY", JSON.stringify(r.metadata?.vulnerabilities)); for (const [name,v] of Object.entries(r.vulnerabilities || {})) console.log("AUDIT", JSON.stringify({name,severity:v.severity,direct:v.isDirect,range:v.range,fixAvailable:v.fixAvailable,via:v.via.map(x=>typeof x==="string"?x:x.title)}));'
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test

@@ -37,6 +37,7 @@ grant execute on function private.has_workspace_role(uuid, public.workspace_role
 
 -- Replace all policies to use helpers in the non-exposed private schema.
 drop policy if exists "members read workspaces" on public.workspaces;
+drop policy if exists "users create own workspaces" on public.workspaces;
 drop policy if exists "owners update workspaces" on public.workspaces;
 drop policy if exists "owners delete workspaces" on public.workspaces;
 drop policy if exists "members read memberships" on public.workspace_members;
