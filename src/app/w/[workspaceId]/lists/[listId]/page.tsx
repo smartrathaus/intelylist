@@ -14,7 +14,8 @@ export default async function ListPage({ params, searchParams }: { params: Promi
   if (!user) redirect("/login");
   const { data: list } = await supabase.from("lists").select("id,name,kind,workspace_id,workspaces(name)").eq("id", listId).eq("workspace_id", workspaceId).single();
   if (!list) notFound();
-  const { data: entries } = await supabase.from("list_entries").select("id,title,notes,is_completed,priority,due_at,quantity,unit,category,assigned_to,created_at").eq("list_id", listId).order("position").order("created_at");
+  const { data: entries } = await supabase.from("list_entries").select("id,title,notes,is_completed,priority,due_at,quantity,unit,category,supermarket,assigned_to,created_at").eq("list_id", listId).order("position").order("created_at");
+  const { data: historyRows } = list.kind === "shopping" || list.kind === "mixed" ? await supabase.from("shopping_order_history").select("entry_id,session_id,sequence_position,completed_at").eq("list_id", listId).order("completed_at", { ascending: false }).limit(1000) : { data: [] };
   const { data: memberRows } = await supabase.from("workspace_members").select("user_id").eq("workspace_id", workspaceId);
   const memberIds = (memberRows ?? []).map((member) => member.user_id);
   const { data: profiles } = memberIds.length
@@ -29,7 +30,7 @@ export default async function ListPage({ params, searchParams }: { params: Promi
     <section className="dashboard list-page">
       <p className="eyebrow">{isShopping ? "EINKAUFSLISTE" : "AUFGABENLISTE"}</p><div className="welcome-row"><div><h1>{list.name}</h1><p className="muted">{entries?.filter(e => !e.is_completed).length ?? 0} offen · {entries?.filter(e => e.is_completed).length ?? 0} erledigt</p></div><div className={`list-icon large ${isShopping ? "shopping" : ""}`}>{isShopping ? <ShoppingBasket size={24}/> : <Check size={24}/>}</div></div>
       {paramsData.error && <p className="notice notice-error">{paramsData.error}</p>}
-      <EntryManager listId={listId} kind={list.kind as "tasks"|"shopping"|"mixed"} entries={(entries ?? []) as {id:string;title:string;notes:string|null;is_completed:boolean;priority:string;due_at:string|null;quantity:number|null;unit:string|null;category:string|null;assigned_to:string|null;created_at:string}[]} profiles={(profiles ?? []) as {user_id:string;display_name:string}[]}/>
+      <EntryManager listId={listId} kind={list.kind as "tasks"|"shopping"|"mixed"} entries={(entries ?? []) as {id:string;title:string;notes:string|null;is_completed:boolean;priority:string;due_at:string|null;quantity:number|null;unit:string|null;category:string|null;supermarket:string|null;assigned_to:string|null;created_at:string}[]} history={(historyRows ?? []) as {entry_id:string;session_id:string;sequence_position:number;completed_at:string}[]} profiles={(profiles ?? []) as {user_id:string;display_name:string}[]}/>
       <RealtimeRefresh channel={`list-${listId}`} table="list_entries" filter={`list_id=eq.${listId}`}/>
     </section>
     <footer className="footer">intelylist <span>·</span> Änderungen werden automatisch aktualisiert.</footer>
