@@ -370,7 +370,7 @@ export async function addEntrySmart(input: { listId: string; title: string; kind
   const isShopping = list.kind === "shopping" || list.kind === "mixed";
   const quantity = isShopping ? (parsed.data.quantity ?? 1) : null;
   if (isShopping) {
-    const { data: candidates } = await supabase.from("list_entries").select("id,title,quantity").eq("list_id", list.id).eq("is_completed", false);
+    const { data: candidates } = await supabase.from("list_entries").select("id,title,quantity").eq("list_id", list.id);
     const existing = (candidates ?? []).find(row => row.title.trim().toLocaleLowerCase() === parsed.data.title.trim().toLocaleLowerCase());
     if (existing) return { ok: true, duplicate: { id: existing.id, title: existing.title, quantity: Number(existing.quantity ?? 1) } };
   }
