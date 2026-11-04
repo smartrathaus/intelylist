@@ -10,7 +10,7 @@ insert into auth.users (
   raw_app_meta_data, raw_user_meta_data, created_at, updated_at
 ) values
   ('11111111-1111-4111-8111-111111111111', 'authenticated', 'authenticated', 'alice@example.test', 'test-hash-a', now(), '{}'::jsonb, '{"display_name":"Alice"}'::jsonb, now(), now()),
-  ('22222222-2222-4222-8222-222222222222', 'authenticated', 'authenticated', 'bob@example.test', 'test-hash-b', now(), '{}'::jsonb, '{"display_name":"Bob"}'::jsonb, false, now(), now());
+  ('22222222-2222-4222-8222-222222222222', 'authenticated', 'authenticated', 'bob@example.test', 'test-hash-b', now(), '{}'::jsonb, '{"display_name":"Bob"}'::jsonb, now(), now());
 
 insert into public.workspaces (id, name, created_by) values
   ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'Alice private space', '11111111-1111-4111-8111-111111111111'),
