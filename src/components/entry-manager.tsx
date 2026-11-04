@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { Check, Circle, GripVertical, Trash2, ChevronUp, ChevronDown, Undo2 } from "lucide-react";
 import { addEntrySmart, confirmDuplicateQuantity, saveEntryOrder, toggleEntry, deleteEntry, updateEntry } from "@/lib/actions";
 
-type Entry = { id:string; title:string; notes:string|null; is_completed:boolean; priority:string; due_at:string|null; quantity:number|null; unit:string|null; category:string|null; assigned_to:string|null };
+type Entry = { id:string; title:string; notes:string|null; is_completed:boolean; priority:string; due_at:string|null; quantity:number|null; unit:string|null; category:string|null; assigned_to:string|null; created_at:string };
 type Profile = { user_id:string; display_name:string };
 type Props = { listId:string; kind:"tasks"|"shopping"|"mixed"; entries:Entry[]; profiles:Profile[] };
 
@@ -27,7 +27,7 @@ export function EntryManager({listId,kind,entries:initialEntries,profiles}:Props
     if(sort==="alpha") rows=[...rows].sort((a,b)=>a.title.localeCompare(b.title,"de"));
     if(sort==="priority") rows=[...rows].sort((a,b)=>["urgent","high","normal","low"].indexOf(a.priority)-["urgent","high","normal","low"].indexOf(b.priority));
     if(sort==="due") rows=[...rows].sort((a,b)=>(a.due_at??"9999").localeCompare(b.due_at??"9999"));
-    if(sort==="created") rows=[...rows].reverse();
+    if(sort==="created") rows=[...rows].sort((a,b)=>b.created_at.localeCompare(a.created_at));
     return rows;
   },[entries,filter,sort,query]);
   async function add(event:React.FormEvent<HTMLFormElement>){
