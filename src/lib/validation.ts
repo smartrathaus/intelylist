@@ -6,10 +6,18 @@ export const listSchema = z.object({
   name: z.string().trim().min(1).max(120),
   kind: z.enum(["tasks", "shopping", "mixed"])
 });
+const emptyToUndefined = (value: unknown) => value === "" || value === null || value === undefined ? undefined : value;
+
 export const entrySchema = z.object({
   listId: z.string().uuid(),
   title: z.string().trim().min(1).max(240),
-  kind: z.enum(["tasks", "shopping", "mixed"])
+  kind: z.enum(["tasks", "shopping", "mixed"]),
+  priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
+  dueAt: z.preprocess(emptyToUndefined, z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/).optional()),
+  assignedTo: z.preprocess(emptyToUndefined, z.string().uuid().optional()),
+  quantity: z.preprocess(emptyToUndefined, z.coerce.number().positive().max(100000).optional()),
+  unit: z.preprocess(emptyToUndefined, z.string().trim().max(32).optional()),
+  category: z.preprocess(emptyToUndefined, z.string().trim().max(80).optional())
 });
 export const credentialsSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
