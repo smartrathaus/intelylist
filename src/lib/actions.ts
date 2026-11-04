@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createHash, randomBytes } from "node:crypto";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { workspaceSchema, listSchema, entrySchema } from "@/lib/validation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -301,4 +302,36 @@ export async function deleteWorkspace(formData: FormData) {
   if (error) redirect(`/w/${workspaceId}?error=Der+Bereich+konnte+nicht+geloescht+werden.`);
   revalidatePath("/");
   redirect("/?message=Der+Bereich+wurde+geloescht.");
+}
+
+
+export async function deleteOwnAccount(formData: FormData) {
+  if (String(formData.get("confirmation") ?? "") !== "KONTO LÖSCHEN") {
+    redirect("/account?error=Bitte+KONTO+LÖSCHEN+zur+Bestaetigung+eingeben.");
+  }
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: memberships } = await supabase.from("workspace_members")
+    .select("workspace_id,role").eq("user_id", user.id);
+  if ((memberships ?? []).some((membership) => membership.role === "owner")) {
+    redirect("/account?error=Bitte+loesche+zuerst+alle+Bereiche,+deren+Inhaber+du+bist.");
+  }
+
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch {
+    redirect("/account?error=Die+serverseitige+Kontoloeschung+ist+noch+nicht+konfiguriert.");
+  }
+
+  if (user.email) {
+    const { error: inviteError } = await admin.from("workspace_invitations").delete().eq("email", user.email);
+    if (inviteError) redirect("/account?error=Einladungen+konnten+nicht+bereinigt+werden.");
+  }
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) redirect("/account?error=Das+Konto+konnte+nicht+geloescht+werden.");
+  await supabase.auth.signOut({ scope: "local" });
+  redirect("/login?message=Dein+Konto+wurde+geloescht.");
 }

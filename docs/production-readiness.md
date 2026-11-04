@@ -21,7 +21,8 @@ Diese Liste trennt bereits implementierte Grundlagen von Nachweisen, die vor ein
 - [ ] Realtime mit zwei realen Browser-Sitzungen und getrennten Nutzern prüfen.
 - [ ] Playwright-Browserabläufe und mobile Breakpoints testen; Tastaturbedienung, Screenreader-Beschriftungen und Kontraste prüfen.
 - [ ] Fehler- und Rate-Limit-Verhalten von Supabase Auth und Einladungen prüfen.
-- [ ] Account-/Workspace-Löschung, Datenexport und Aufbewahrungs-/Löschfristen festlegen und umsetzen.
+- [ ] Kontolöschung mit serverseitigem Admin-Key auf einer echten Supabase-Instanz testen; Workspace-Löschung und JSON-Export sind implementiert.
+- [ ] Aufbewahrungs-/Löschfristen und Datenexport für Nutzer außerhalb einzelner Workspaces festlegen.
 - [ ] Datenschutzinformation, Impressum soweit erforderlich, Auftragsverarbeitung, EU-Region, Cookie-/Tracking-Verhalten und Zuständigkeiten prüfen.
 - [ ] Supabase-Backups und Wiederherstellung praktisch testen; Free-Tarif-Backups nicht voraussetzen.
 - [ ] Produktionsdomain, HTTPS, Auth-Redirect-Allowlist, E-Mail-Vorlagen und Absenderdomain konfigurieren.

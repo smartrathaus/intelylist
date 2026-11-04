@@ -19,7 +19,7 @@ Ein Nutzer sieht Daten nur, wenn er Mitglied des zugehörigen Workspaces ist. Li
 4. Mitglieder können Rollen nicht direkt per UPDATE ändern; direkte DELETE-Rechte auf Mitgliedschaften sind entzogen.
 5. Trigger verhindern das Verschieben von Listen/Einträgen zwischen Workspaces und schützen den Owner-Datensatz.
 6. Server Actions prüfen Authentifizierung und validieren Eingaben mit Zod.
-7. Der Service-Role-/Secret-Key wird nicht im Browser verwendet.
+7. Der Service-Role-/Secret-Key wird ausschließlich im server-only Admin-Client für die eigene Kontolöschung verwendet und niemals an den Browser ausgeliefert.
 
 ## Noch notwendige Sicherheitsarbeit vor Livegang
 - Rollenwechsel, Mitgliederentfernung und Einladungsannahme sind als eng begrenzte Datenbankfunktionen umgesetzt; deren Verhalten muss noch mit vollständigen RLS- und Integrationstests abgesichert werden.

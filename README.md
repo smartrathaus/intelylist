@@ -15,7 +15,7 @@ Der erste App-Unterbau liegt im Branch `feat/initial-app`:
 - Datenbankmigration für Workspace-Mandantentrennung und restriktivere Mitgliederrechte, sichere Austritts-/Löschfunktionen und JSON-Export
 - Vitest-Validierungstests und GitHub-Actions-Grundlage
 
-**Noch nicht produktionsreif:** Einladungsversand per E-Mail (aktuell wird ein Link zum manuellen Teilen erzeugt), Kontolöschung mit Service-Role-Absicherung, vollständige Browser-/Accessibility-Tests, Live-Konfiguration und Deployment sind noch offen. Die Datenbankmigrationen wurden noch nicht auf einem echten Supabase-Projekt ausgeführt.
+**Noch nicht produktionsreif:** Einladungsversand per E-Mail (aktuell wird ein Link zum manuellen Teilen erzeugt),  vollständige Browser-/Accessibility-Tests, Live-Konfiguration und Deployment sind noch offen. Die Datenbankmigrationen wurden noch nicht auf einem echten Supabase-Projekt ausgeführt.
 
 ## Technologie
 
@@ -55,7 +55,7 @@ npx supabase test db
 1. Supabase-Projekt in Frankfurt (EU) anlegen und Migrationen ausführen.
 2. Auth-URLs und E-Mail-Bestätigung konfigurieren.
 3. Vercel-Projekt mit diesem GitHub-Repository verbinden.
-4. ``NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` und `NEXT_PUBLIC_SITE_URL` als Vercel-Umgebungsvariablen setzen.
+4. ``NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL` und `SUPABASE_SERVICE_ROLE_KEY` (ausschließlich serverseitig) als Vercel-Umgebungsvariablen setzen.
 5. Domain, Redirect-URLs, Datenschutzinformationen, Backups und Wiederherstellung testen.
 
 Geheimnisse dürfen niemals in Git eingecheckt werden. Ein Supabase Service-Role-/Secret-Key gehört niemals in den Browser und wird in der aktuellen App noch nicht benötigt.
