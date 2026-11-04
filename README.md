@@ -55,7 +55,7 @@ npx supabase test db
 1. Supabase-Projekt in Frankfurt (EU) anlegen und Migrationen ausführen.
 2. Auth-URLs und E-Mail-Bestätigung konfigurieren.
 3. Vercel-Projekt mit diesem GitHub-Repository verbinden.
-4. `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` und `NEXT_PUBLIC_SITE_URL` als Vercel-Umgebungsvariablen setzen.
+4. ``NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` und `NEXT_PUBLIC_SITE_URL` als Vercel-Umgebungsvariablen setzen.
 5. Domain, Redirect-URLs, Datenschutzinformationen, Backups und Wiederherstellung testen.
 
 Geheimnisse dürfen niemals in Git eingecheckt werden. Ein Supabase Service-Role-/Secret-Key gehört niemals in den Browser und wird in der aktuellen App noch nicht benötigt.
