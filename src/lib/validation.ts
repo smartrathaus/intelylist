@@ -11,6 +11,7 @@ const emptyToUndefined = (value: unknown) => value === "" || value === null || v
 export const entrySchema = z.object({
   listId: z.string().uuid(),
   title: z.string().trim().min(1).max(240),
+  notes: z.preprocess(emptyToUndefined, z.string().trim().max(2000).optional()),
   kind: z.enum(["tasks", "shopping", "mixed"]),
   priority: z.preprocess(emptyToUndefined, z.enum(["low", "normal", "high", "urgent"]).default("normal")),
   dueAt: z.preprocess(emptyToUndefined, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
