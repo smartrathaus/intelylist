@@ -437,3 +437,18 @@ export async function setEntryQuantity(input: { entryId: string; quantity: numbe
   revalidatePath(`/w/${workspaceId}/lists/${entry.list_id}`);
   return { ok: true as const };
 }
+
+export async function startNewShoppingRun(listId: string) {
+  if (!z.uuid().safeParse(listId).success) return { ok: false as const, message: "Ungültige Liste." };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false as const, message: "Bitte melde dich erneut an." };
+  const { data: list } = await supabase.from("lists").select("id,workspace_id,kind").eq("id", listId).single();
+  if (!list || !["shopping","mixed"].includes(list.kind)) return { ok: false as const, message: "Einkaufsliste nicht gefunden." };
+  const { error: entriesError } = await supabase.from("list_entries").update({ is_completed: false, completed_at: null }).eq("list_id", listId).eq("is_completed", true);
+  if (entriesError) return { ok: false as const, message: "Der neue Einkauf konnte nicht gestartet werden." };
+  const { error: listError } = await supabase.from("lists").update({ shopping_session_id: null }).eq("id", listId);
+  if (listError) return { ok: false as const, message: "Der Einkaufsverlauf konnte nicht zurückgesetzt werden." };
+  revalidatePath(`/w/${list.workspace_id}/lists/${listId}`);
+  return { ok: true as const };
+}
