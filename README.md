@@ -10,12 +10,12 @@ Der erste App-Unterbau liegt im Branch `feat/initial-app`:
 - Dashboard mit Auswahl gemeinsamer Bereiche
 - Registrierung, Anmeldung, Abmeldung und E-Mail-Bestätigungs-Callback über Supabase Auth
 - Bereiche und Aufgaben-/Einkaufslisten anlegen
-- Einträge hinzufügen, abhaken und löschen
-- Supabase Realtime-Aktualisierung für Listeneinträge
+- Einträge mit Notizen, Zuweisung, Fälligkeit, Priorität und Einkaufsfeldern erstellen, bearbeiten, abhaken und löschen
+- Supabase Realtime-Aktualisierung für Listeneinträge, PWA-Manifest und datensparsamer Offline-Fallback ohne Zwischenspeicherung privater Daten
 - Datenbankmigration für Workspace-Mandantentrennung und restriktivere Mitgliederrechte
 - Vitest-Validierungstests und GitHub-Actions-Grundlage
 
-**Noch nicht produktionsreif:** Einladungsversand und sichere Annahme, Passwort-Reset, vollständige Rollenverwaltung, Bearbeiten von Aufgabenfeldern (Zuweisung/Fälligkeit/Priorität/Mengen/Kategorien), vollständige RLS-Negativtests, Barrierefreiheits- und Browser-Tests, Live-Konfiguration und Deployment sind noch offen. Die Datenbankmigrationen wurden noch nicht auf einem echten Supabase-Projekt ausgeführt.
+**Noch nicht produktionsreif:** Einladungsversand per E-Mail (aktuell wird ein Link zum manuellen Teilen erzeugt), vollständige RLS-Negativtests, Barrierefreiheits- und Browser-Tests, Live-Konfiguration und Deployment sind noch offen. Die Datenbankmigrationen wurden noch nicht auf einem echten Supabase-Projekt ausgeführt.
 
 ## Technologie
 
