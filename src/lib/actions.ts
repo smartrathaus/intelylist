@@ -90,7 +90,7 @@ export async function createEntry(formData: FormData) {
   const parsed = entrySchema.safeParse({
     listId: formData.get("listId"), title: formData.get("title"), kind: formData.get("kind"),
     notes: formData.get("notes"), priority: formData.get("priority"), dueAt: formData.get("dueAt"), assignedTo: formData.get("assignedTo"),
-    quantity: formData.get("quantity"), unit: formData.get("unit"), category: formData.get("category")
+    quantity: formData.get("quantity"), unit: formData.get("unit"), category: formData.get("category"), supermarket: formData.get("supermarket")
   });
   if (!parsed.success) redirect("/?error=Bitte+einen+gueltigen+Eintrag+eingeben.");
   const supabase = await createClient();
@@ -117,13 +117,16 @@ export async function toggleEntry(formData: FormData) {
   const completed = String(formData.get("completed") ?? "") === "true";
   if (!z.uuid().safeParse(id).success) redirect("/");
   const supabase = await createClient();
-  const { data: entry } = await supabase.from("list_entries").select("id,list_id,lists!inner(workspace_id)").eq("id", id).single();
+  const { data: entry } = await supabase.from("list_entries").select("id,list_id,lists!inner(workspace_id,kind)").eq("id", id).single();
   if (!entry) redirect("/");
-  const { error } = await supabase.from("list_entries").update({
-    is_completed: completed, completed_at: completed ? new Date().toISOString() : null
-  }).eq("id", id);
+  const listInfo = entry.lists as unknown as { workspace_id: string; kind: string };
+  const { error } = listInfo.kind === "shopping" || listInfo.kind === "mixed"
+    ? await supabase.rpc("set_list_entry_completion", { target_entry: id, target_list: entry.list_id, completed })
+    : await supabase.from("list_entries").update({
+        is_completed: completed, completed_at: completed ? new Date().toISOString() : null
+      }).eq("id", id);
   if (error) redirect("/");
-  const workspaceId = (entry.lists as unknown as { workspace_id: string }).workspace_id;
+  const workspaceId = listInfo.workspace_id;
   revalidatePath(`/w/${workspaceId}/lists/${entry.list_id}`);
 }
 
@@ -241,7 +244,9 @@ export async function updateEntry(formData: FormData) {
     assigned_to: parsed.data.assignedTo ?? null,
     quantity: parsed.data.quantity ?? null,
     unit: parsed.data.unit || null,
-    category: parsed.data.category || null
+    category: parsed.data.category || null,
+    supermarket: parsed.data.supermarket || null,
+    quantity: parsed.data.quantity ?? null
   }).eq("id", id).eq("list_id", list.id);
   if (error) redirect(`/w/${list.workspace_id}/lists/${list.id}?error=Eintrag+konnte+nicht+aktualisiert+werden.`);
   revalidatePath(`/w/${list.workspace_id}/lists/${list.id}`);
@@ -360,7 +365,7 @@ export async function deleteOwnAccount(formData: FormData) {
 export type QuickEntryResult = { ok: true; duplicate?: { id: string; title: string; quantity: number } } | { ok: false; message: string };
 
 export async function addEntrySmart(input: { listId: string; title: string; kind: "tasks" | "shopping" | "mixed"; quantity?: number; unit?: string }) : Promise<QuickEntryResult> {
-  const parsed = z.object({ listId: z.uuid(), title: z.string().trim().min(1).max(240), kind: z.enum(["tasks","shopping","mixed"]), quantity: z.number().positive().max(100000).optional(), unit: z.string().max(32).optional() }).safeParse(input);
+  const parsed = z.object({ listId: z.uuid(), title: z.string().trim().min(1).max(240), kind: z.enum(["tasks","shopping","mixed"]), quantity: z.number().int().min(1).max(100000).optional(), unit: z.string().max(32).optional(), supermarket: z.string().max(100).optional() }).safeParse(input);
   if (!parsed.success) return { ok: false, message: "Bitte prüfe den Eintrag." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -376,7 +381,7 @@ export async function addEntrySmart(input: { listId: string; title: string; kind
   }
   const { data: lastEntry } = await supabase.from("list_entries").select("position").eq("list_id", list.id).order("position", { ascending: false }).limit(1).maybeSingle();
   const nextPosition = (lastEntry?.position ?? -1) + 1;
-  const { error } = await supabase.from("list_entries").insert({ list_id: list.id, title: parsed.data.title, created_by: user.id, quantity, unit: parsed.data.unit || null, priority: "normal", position: nextPosition });
+  const { error } = await supabase.from("list_entries").insert({ list_id: list.id, title: parsed.data.title, created_by: user.id, quantity, unit: parsed.data.unit || null, supermarket: parsed.data.supermarket || null, priority: "normal", position: nextPosition });
   if (error) return { ok: false, message: "Der Eintrag konnte nicht gespeichert werden." };
   revalidatePath(`/w/${list.workspace_id}/lists/${list.id}`);
   return { ok: true };
@@ -415,5 +420,20 @@ export async function saveEntryOrder(input: { listId: string; orderedIds: string
   const updates = await Promise.all(parsed.data.orderedIds.map((id, index) => supabase.from("list_entries").update({ position: index }).eq("id", id).eq("list_id", parsed.data.listId)));
   if (updates.some(result => result.error)) return { ok: false as const };
   revalidatePath(`/w/${list.workspace_id}/lists/${parsed.data.listId}`);
+  return { ok: true as const };
+}
+
+export async function setEntryQuantity(input: { entryId: string; quantity: number }) {
+  const parsed = z.object({ entryId: z.uuid(), quantity: z.number().int().min(1).max(100000) }).safeParse(input);
+  if (!parsed.success) return { ok: false as const, message: "Die Menge muss eine ganze Zahl ab 1 sein." };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false as const, message: "Bitte melde dich erneut an." };
+  const { data: entry } = await supabase.from("list_entries").select("id,list_id,lists!inner(workspace_id)").eq("id", parsed.data.entryId).single();
+  if (!entry) return { ok: false as const, message: "Eintrag nicht gefunden." };
+  const { error } = await supabase.from("list_entries").update({ quantity: parsed.data.quantity }).eq("id", entry.id);
+  if (error) return { ok: false as const, message: "Menge konnte nicht gespeichert werden." };
+  const workspaceId = (entry.lists as unknown as {workspace_id:string}).workspace_id;
+  revalidatePath(`/w/${workspaceId}/lists/${entry.list_id}`);
   return { ok: true as const };
 }
