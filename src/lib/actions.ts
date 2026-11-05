@@ -118,6 +118,8 @@ export async function toggleEntry(formData: FormData) {
   const completed = String(formData.get("completed") ?? "") === "true";
   if (!z.uuid().safeParse(id).success) redirect("/");
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
   const { data: entry } = await supabase.from("list_entries").select("id,list_id,title,notes,priority,due_at,assigned_to,created_by,position,is_completed,lists!inner(workspace_id,kind)").eq("id", id).single();
   if (!entry) redirect("/");
   const listInfo = entry.lists as unknown as { workspace_id: string; kind: string };
