@@ -52,3 +52,40 @@ input:focus,select:focus{border-color:#75c9c1;box-shadow:0 0 0 3px rgba(41,159,1
 .entry-manager .entry-form-advanced>input{border:1px solid var(--line);flex:1 1 140px}
 .entry-manager .entry-form-advanced>input[name="title"]{flex:2 1 220px}
 @media(max-width:700px){.new-quantity{flex:0 0 auto}.new-quantity button{width:38px;height:38px}.search-field{grid-column:1/-1;width:100%}.quantity-control button{width:34px;height:34px}.entry-copy>span{flex-basis:100%}.entry-manager .entry-form-advanced>input[name="title"]{flex-basis:100%}}
+
+
+/* Personal themes: token-based so every component follows the selected palette. */
+:root{--accent:var(--green);--accent-dark:var(--green-dark);--accent-soft:var(--green-soft)}
+:root[data-theme="fresh-mint"]{--accent:#299f98;--accent-dark:#20857f;--accent-soft:#e5f5f3}
+:root[data-theme="ocean-blue"]{--accent:#3478bd;--accent-dark:#245f9a;--accent-soft:#e8f1fb}
+:root[data-theme="soft-lavender"]{--accent:#8870bd;--accent-dark:#6f59a1;--accent-soft:#f0ecf8}
+:root[data-theme="warm-sand"]{--accent:#b47a3d;--accent-dark:#91602d;--accent-soft:#f8f0e5}
+:root[data-theme="graphite"]{--accent:#566575;--accent-dark:#3e4c5a;--accent-soft:#e9edf0}
+:root[data-theme="custom"]{--accent:var(--accent-custom,#299f98);--accent-dark:color-mix(in srgb,var(--accent) 78%,#142d4b);--accent-soft:color-mix(in srgb,var(--accent) 13%,white)}
+.brand-mark,.workspace-icon,.create-icon,.empty-icon,.member-avatar,.count-pill{background:var(--accent-soft);color:var(--accent)}
+.button-primary{background:var(--accent)}.button-primary:hover{background:var(--accent-dark)}
+.button-secondary{background:var(--accent-soft);color:var(--accent)}
+.eyebrow,.summary-chip,.subtle-link{color:var(--accent)}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+.check-button:hover,.drag-handle:hover{color:var(--accent)}
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 0}
+.theme-choice{display:grid;gap:7px;text-align:left;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--surface);color:var(--ink)}
+.theme-choice.selected{border:2px solid var(--accent);padding:11px;box-shadow:0 0 0 3px var(--accent-soft)}
+.theme-choice strong{font-size:12px}.theme-choice small{font-size:10px;color:var(--muted)}
+.theme-swatch{height:30px;border-radius:8px;background:#299f98}
+.theme-swatch.ocean-blue{background:#3478bd}.theme-swatch.soft-lavender{background:#8870bd}.theme-swatch.warm-sand{background:#b47a3d}.theme-swatch.graphite{background:#566575}
+.theme-field{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:14px 0;font-size:12px;color:var(--muted)}
+.theme-field select{min-width:170px}.accent-input{display:flex;align-items:center;gap:10px}.accent-input input{width:48px;height:38px;padding:3px}.accent-input code{font-size:11px;color:var(--ink)}
+:root[data-mode="dark"]{--bg:#101820;--surface:#19242e;--ink:#e7edf1;--muted:#a0adb7;--line:#2b3945;--green-soft:#203b3b;--shadow:0 12px 36px rgba(0,0,0,.25)}
+:root[data-mode="dark"] body,:root[data-mode="dark"] html{background:var(--bg);color:var(--ink)}
+:root[data-mode="dark"] .topbar,:root[data-mode="dark"] .entry-list,:root[data-mode="dark"] .entry-form,:root[data-mode="dark"] .member-list,:root[data-mode="dark"] .account-panel,:root[data-mode="dark"] .account-danger,:root[data-mode="dark"] .workspace-card,:root[data-mode="dark"] .list-card,:root[data-mode="dark"] input,:root[data-mode="dark"] select,:root[data-mode="dark"] .entry-edit[open]{background:var(--surface);color:var(--ink);border-color:var(--line)}
+:root[data-mode="dark"] .entry-row,:root[data-mode="dark"] .member-row{border-color:var(--line)}
+:root[data-mode="dark"] .entry-row.is-complete{background:#1d2a33}
+:root[data-mode="dark"] .auth-card{background:var(--surface);border-color:var(--line)}
+:root[data-mode="dark"] .create-panel{background:#18252d;border-color:var(--line)}
+:root[data-mode="dark"] .search-field{background:var(--surface)}
+:root[data-mode="dark"] .search-field input{background:transparent}
+:root[data-mode="dark"] .theme-choice{background:var(--surface);color:var(--ink)}
+@media(prefers-color-scheme:dark){:root[data-mode="system"]{color-scheme:dark;--bg:#101820;--surface:#19242e;--ink:#e7edf1;--muted:#a0adb7;--line:#2b3945;--green-soft:#203b3b}}
+:root[data-mode="light"]{color-scheme:light}
+:root[data-mode="dark"]{color-scheme:dark}
