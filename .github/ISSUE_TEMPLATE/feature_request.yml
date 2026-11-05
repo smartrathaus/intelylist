@@ -1,0 +1,53 @@
+name: Feature anfragen
+description: Neue Funktion oder Produktverbesserung vorschlagen
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Neue Funktionen werden zuerst als Issue beschrieben und priorisiert.
+        Bitte beschreibe den Nutzen und das gewünschte Verhalten – noch keine technische Lösung vorgeben.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Welches Problem soll gelöst werden?
+      description: Wer hat welches Problem und in welcher Situation?
+      placeholder: Als Nutzer möchte ich ..., weil ...
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Gewünschtes Ergebnis
+      description: Was soll nach Umsetzung möglich sein?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Akzeptanzkriterien
+      description: Woran lässt sich objektiv erkennen, dass das Feature fertig ist? Je Kriterium eine Zeile.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Geschäftliche Priorität
+      options:
+        - Niedrig
+        - Normal
+        - Hoch
+        - Kritisch
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Ergänzende Hinweise / Mockups
+      description: Optional – Screenshots, Beispiele, Abhängigkeiten oder offene Fragen.
+    validations:
+      required: false
