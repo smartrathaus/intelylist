@@ -11,6 +11,6 @@ describe("automatic shopping categories", () => {
   it("uses a safe fallback and stable aisle ordering", () => {
     expect(suggestShoppingCategory("Spezialgewürz")).toBe("Sonstiges");
     expect(shoppingCategoryOrder[0]).toBe("Obst & Gemüse");
-    expect(shoppingCategoryOrder.at(-1)).toBe("Sonstiges");
+    expect(shoppingCategoryOrder[shoppingCategoryOrder.length-1]).toBe("Sonstiges");
   });
 });
