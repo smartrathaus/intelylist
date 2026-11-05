@@ -2,9 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-export function GuestAccountUpgrade({ stage = "email" }: { stage?: "email" | "password" }) {
+export function GuestAccountUpgrade({ stage = "email", guestToken }: { stage?: "email" | "password"; guestToken?: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,5 +68,6 @@ export function GuestAccountUpgrade({ stage = "email" }: { stage?: "email" | "pa
       <button className="button button-secondary button-small" type="submit" disabled={busy}>{busy ? "Sende…" : "E-Mail verknüpfen"}</button>
     </form>
     {message && <p className="muted" role="status">{message}</p>}
+    {guestToken && <p className="muted">Du hast bereits ein intelylist-Konto? <Link href={`/login?next=${encodeURIComponent(`/guest/${guestToken}`)}`}>Melde dich an und öffne diese Einladung mit deinem Konto erneut.</Link></p>}
   </section>;
 }
