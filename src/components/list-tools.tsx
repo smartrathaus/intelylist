@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Bell, Copy, FileText, Repeat, Share2 } from "lucide-react";
-import { createEntryFromTemplate, createListFromTemplate, saveListTemplate, setRecurringTask, createEntryReminder, getDueNotifications, markNotificationRead } from "@/lib/advanced-actions";
+import { Bell, FileText, Repeat } from "lucide-react";
+import { createListFromTemplate, saveListTemplate, setRecurringTask, createEntryReminder, getDueNotifications, markNotificationRead } from "@/lib/advanced-actions";
 
 type Template={id:string;name:string;kind:string};
 type Entry={id:string;title:string;is_completed:boolean};
