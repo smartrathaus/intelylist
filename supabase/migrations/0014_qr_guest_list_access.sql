@@ -97,3 +97,8 @@ for delete to authenticated using (private.is_list_guest(list_id));
 
 -- Only guests may execute this helper to record their own membership; membership rows cannot be forged via REST.
 revoke insert,update,delete on public.list_guest_members from authenticated;
+
+create policy "list guests read shopping history" on public.shopping_order_history
+for select to authenticated using (private.is_list_guest(list_id));
+create policy "list guests add shopping history" on public.shopping_order_history
+for insert to authenticated with check (private.is_list_guest(list_id));
