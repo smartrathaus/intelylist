@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
+import { Fragment, useMemo, useState, useTransition, type SetStateAction } from "react";
 import { Check, Circle, GripVertical, Trash2, ChevronUp, ChevronDown, Undo2, Plus, Minus, Search, Star, Printer, Share2 } from "lucide-react";
 import { addEntrySmart, confirmDuplicateQuantity, saveEntryOrder, toggleEntry, deleteEntry, updateEntry, setEntryQuantity, startNewShoppingRun } from "@/lib/actions";
 import { bulkUpdateEntries, recordItemUse, toggleFavorite } from "@/lib/advanced-actions";
@@ -12,8 +12,10 @@ type History = { entry_id:string; session_id:string; sequence_position:number; c
 type Props = { listId:string; workspaceId:string; kind:"tasks"|"shopping"|"mixed"; entries:Entry[]; profiles:Profile[]; history:History[]; favorites:string[]; recentItems:string[] };
 
 export function EntryManager({listId,workspaceId,kind,entries:initialEntries,profiles,history,favorites:initialFavorites,recentItems}:Props) {
-  const [entries,setEntries]=useState(initialEntries);
-  useEffect(()=>setEntries(initialEntries),[initialEntries]);
+  const [entryState,setEntryState]=useState({source:initialEntries,value:initialEntries});
+  if(entryState.source!==initialEntries)setEntryState({source:initialEntries,value:initialEntries});
+  const entries=entryState.value;
+  const setEntries=(next:SetStateAction<Entry[]>)=>setEntryState(current=>({source:current.source,value:typeof next==="function"?next(current.value):next}));
   const [filter,setFilter]=useState("open");
   const [sort,setSort]=useState(kind==="shopping"?"habit":"manual");
   const [query,setQuery]=useState("");
@@ -22,9 +24,11 @@ export function EntryManager({listId,workspaceId,kind,entries:initialEntries,pro
   const [unit,setUnit]=useState("");
   const [supermarket,setSupermarket]=useState("");
   const [message,setMessage]=useState("");
-  const [favorites,setFavorites]=useState(initialFavorites);
+  const [favoriteState,setFavoriteState]=useState({source:initialFavorites,value:initialFavorites});
+  if(favoriteState.source!==initialFavorites)setFavoriteState({source:initialFavorites,value:initialFavorites});
+  const favorites=favoriteState.value;
+  const setFavorites=(next:SetStateAction<string[]>)=>setFavoriteState(current=>({source:current.source,value:typeof next==="function"?next(current.value):next}));
   const [selected,setSelected]=useState<string[]>([]);
-  useEffect(()=>setFavorites(initialFavorites),[initialFavorites]);
   const [undo,setUndo]=useState<{id:string;completed:boolean}|null>(null);
   const [busy,startTransition]=useTransition();
   const shopping=kind==="shopping"||kind==="mixed";
@@ -134,7 +138,7 @@ export function EntryManager({listId,workspaceId,kind,entries:initialEntries,pro
       <select value={filter} onChange={e=>setFilter(e.target.value)} aria-label="Statusfilter"><option value="open">Offen</option><option value="done">Erledigt</option><option value="all">Alle</option><option value="overdue">Überfällig</option></select>
       <select value={sort} onChange={e=>setSort(e.target.value)} aria-label="Sortieren"><option value="manual">Manuelle Reihenfolge</option><option value="status">Status: offen zuerst</option>{shopping&&<><option value="habit">Mein üblicher Einkaufsweg</option><option value="store">Nach Supermarkt</option><option value="category">Nach Regalgruppe</option><option value="favorites">Favoriten zuerst</option></>}<option value="alpha">Alphabetisch</option><option value="priority">Priorität</option><option value="due">Fälligkeit</option><option value="created">Neueste zuerst</option></select>
       {undo&&<button className="button button-secondary button-small" onClick={undoLast}><Undo2 size={14}/> Rückgängig</button>}
-      <button type="button" className="button button-ghost button-small" onClick={()=>window.print()}><Printer size={14}/> Drucken / PDF</button><button type="button" className="button button-ghost button-small" onClick={shareList}><Share2 size={14}/> Teilen</button>{shopping&&entries.some(e=>e.is_completed)&&<button className="button button-secondary button-small" onClick={startNextShoppingRun}>Neuen Einkauf starten</button>}
+      <button type="button" className="button button-ghost button-small" onClick={()=>window.print()}><Printer size={14}/> Drucken / PDF</button><button type="button" className="button button-ghost button-small" onClick={shareList}><Share2 size={14}/> Teilen</button>{shopping&&entries.some(e=>e.is_completed)&&<button type="button" className="button button-secondary button-small" onClick={startNextShoppingRun}>Neuen Einkauf starten</button>}
     </div>
     {sort==="habit"&&shopping&&<p className="list-hint">Die Reihenfolge basiert auf den letzten fünf gespeicherten Einkaufsdurchläufen. Bei neuen Artikeln wird der Name als Fallback verwendet.</p>}
     {selected.length>0&&<div className="bulk-toolbar"><strong>{selected.length} ausgewählt</strong><button type="button" className="button button-secondary button-small" onClick={()=>applyBulk(false)}>Öffnen</button><button type="button" className="button button-secondary button-small" onClick={()=>applyBulk(true)}>Erledigen</button><select aria-label="Priorität für Auswahl" defaultValue="" onChange={e=>{if(e.target.value)applyBulk(undefined,e.target.value as "low"|"normal"|"high"|"urgent");}}><option value="">Priorität ändern…</option><option value="low">Niedrig</option><option value="normal">Normal</option><option value="high">Hoch</option><option value="urgent">Dringend</option></select><button type="button" className="button button-ghost button-small" onClick={()=>setSelected([])}>Auswahl aufheben</button></div>}
