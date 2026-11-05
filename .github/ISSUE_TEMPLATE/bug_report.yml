@@ -1,0 +1,42 @@
+name: Fehler melden
+description: Fehler nachvollziehbar dokumentieren
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: observed
+    attributes:
+      label: Beobachtetes Verhalten
+      description: Was passiert aktuell?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+      description: Was sollte stattdessen passieren?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Schritte zur Reproduktion
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Umgebung
+      placeholder: Browser, Gerät, Preview/Production, ggf. Build
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Fehlermeldungen / Screenshots
+    validations:
+      required: false
