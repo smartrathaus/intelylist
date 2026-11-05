@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { createHash, randomBytes } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 
 const themeSchema = z.object({
@@ -154,4 +155,30 @@ export async function getDueNotifications() {
   if(!user)return [];
   const {data}=await supabase.from("user_notifications").select("id,title,body,remind_at").eq("user_id",user.id).is("read_at",null).lte("remind_at",new Date().toISOString()).order("remind_at").limit(20);
   return data??[];
+}
+
+export async function createListGuestInvite(input:{listId:string;hours?:number;maxUses?:number}) {
+ const parsed=z.object({listId:z.uuid(),hours:z.number().int().min(1).max(168).default(24),maxUses:z.number().int().min(1).max(100).default(10)}).safeParse(input);
+ if(!parsed.success)return {ok:false,message:"Ungültige Freigabe."};
+ const supabase=await createClient();
+ const {data:{user}}=await supabase.auth.getUser();
+ if(!user||user.is_anonymous)return {ok:false,message:"Nur angemeldete Mitglieder können einen Gastzugang erstellen."};
+ const {data:list}=await supabase.from("lists").select("id,workspace_id").eq("id",parsed.data.listId).single();
+ if(!list)return {ok:false,message:"Liste nicht gefunden."};
+ const token=randomBytes(32).toString("base64url");
+ const expiresAt=new Date(Date.now()+parsed.data.hours*60*60*1000).toISOString();
+ const {data,error}=await supabase.from("list_guest_invites").insert({list_id:list.id,token_hash:createHash("sha256").update(token).digest("hex"),created_by:user.id,expires_at:expiresAt,max_uses:parsed.data.maxUses}).select("id").single();
+ if(error||!data)return {ok:false,message:"Gastlink konnte nicht erstellt werden."};
+ revalidatePath(`/w/${list.workspace_id}/lists/${list.id}`);
+ return {ok:true,url:`${process.env.NEXT_PUBLIC_SITE_URL??""}/guest/${token}`,expiresAt};
+}
+
+export async function redeemListGuestInvite(token:string) {
+ if(!/^[A-Za-z0-9_-]{43}$/.test(token))return {ok:false,message:"Der QR-Code ist ungültig."};
+ const supabase=await createClient();
+ const {data:{user}}=await supabase.auth.getUser();
+ if(!user)return {ok:false,message:"Bitte starte den Gastzugang erneut."};
+ const {data,error}=await supabase.rpc("redeem_list_guest_invite",{raw_token:token});
+ if(error||!data?.[0])return {ok:false,message:"Dieser Gastzugang ist abgelaufen, widerrufen oder ausgeschöpft."};
+ return {ok:true,listId:data[0].list_id,listName:data[0].list_name,expiresAt:data[0].expires_at};
 }
