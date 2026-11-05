@@ -89,3 +89,25 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-m
 @media(prefers-color-scheme:dark){:root[data-mode="system"]{color-scheme:dark;--bg:#101820;--surface:#19242e;--ink:#e7edf1;--muted:#a0adb7;--line:#2b3945;--green-soft:#203b3b}}
 :root[data-mode="light"]{color-scheme:light}
 :root[data-mode="dark"]{color-scheme:dark}
+
+
+/* Touch-safe pointer drag, bulk actions, favorites and print/PDF layout. */
+.drag-handle{border:0;background:transparent;padding:7px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;border-radius:8px}
+.drag-handle:active{cursor:grabbing;background:var(--accent-soft)}
+.entry-row[data-entry-id]{scroll-margin:100px}
+.entry-row>input[type="checkbox"]{width:17px;height:17px;accent-color:var(--accent);flex:0 0 auto}
+.favorite-button{border:0;background:transparent;color:#a0a9a2;padding:7px;border-radius:8px;display:grid;place-items:center}
+.favorite-button.active{color:#d49b28;background:#fff7e4}
+.bulk-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:11px 13px;margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.bulk-toolbar strong{font-size:12px;margin-right:auto}.bulk-toolbar select{padding:8px;font-size:11px}
+@media(max-width:700px){.bulk-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.bulk-toolbar strong{grid-column:1/-1}.drag-handle{padding:8px}.entry-row>input[type="checkbox"]{width:20px;height:20px}}
+@media print{
+ @page{size:auto;margin:14mm}
+ body{background:#fff!important;color:#111!important;font-size:11pt}
+ .topbar,.footer,.entry-form,.list-toolbar,.bulk-toolbar,.check-button,.drag-handle,.order-actions,.entry-edit,.icon-button,.favorite-button,.list-hint,.notice{display:none!important}
+ .app-shell,.dashboard{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
+ .entry-list{border:0!important;overflow:visible!important}
+ .entry-row{break-inside:avoid;border-bottom:1px solid #ddd!important;padding:8px 0!important;background:#fff!important;color:#111!important}
+ .entry-copy,.entry-copy>span{color:#111!important}.entry-copy small{color:#555!important}
+ .welcome-row{margin:0 0 15px!important}.welcome-row h1{font-size:24pt!important}
+}
