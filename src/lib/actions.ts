@@ -364,8 +364,8 @@ export async function deleteOwnAccount(formData: FormData) {
 
 export type QuickEntryResult = { ok: true; duplicate?: { id: string; title: string; quantity: number } } | { ok: false; message: string };
 
-export async function addEntrySmart(input: { listId: string; title: string; kind: "tasks" | "shopping" | "mixed"; quantity?: number; unit?: string; supermarket?: string }) : Promise<QuickEntryResult> {
-  const parsed = z.object({ listId: z.uuid(), title: z.string().trim().min(1).max(240), kind: z.enum(["tasks","shopping","mixed"]), quantity: z.number().int().min(1).max(100000).optional(), unit: z.string().max(32).optional(), supermarket: z.string().max(100).optional() }).safeParse(input);
+export async function addEntrySmart(input: { listId: string; title: string; kind: "tasks" | "shopping" | "mixed"; quantity?: number; unit?: string; supermarket?: string; category?: string }) : Promise<QuickEntryResult> {
+  const parsed = z.object({ listId: z.uuid(), title: z.string().trim().min(1).max(240), kind: z.enum(["tasks","shopping","mixed"]), quantity: z.number().int().min(1).max(100000).optional(), unit: z.string().max(32).optional(), supermarket: z.string().max(100).optional(), category: z.string().max(80).optional() }).safeParse(input);
   if (!parsed.success) return { ok: false, message: "Bitte prüfe den Eintrag." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -381,7 +381,7 @@ export async function addEntrySmart(input: { listId: string; title: string; kind
   }
   const { data: lastEntry } = await supabase.from("list_entries").select("position").eq("list_id", list.id).order("position", { ascending: false }).limit(1).maybeSingle();
   const nextPosition = (lastEntry?.position ?? -1) + 1;
-  const { error } = await supabase.from("list_entries").insert({ list_id: list.id, title: parsed.data.title, created_by: user.id, quantity, unit: parsed.data.unit || null, supermarket: parsed.data.supermarket || null, priority: "normal", position: nextPosition });
+  const { error } = await supabase.from("list_entries").insert({ list_id: list.id, title: parsed.data.title, created_by: user.id, quantity, unit: parsed.data.unit || null, supermarket: parsed.data.supermarket || null, category: parsed.data.category || null, priority: "normal", position: nextPosition });
   if (error) return { ok: false, message: "Der Eintrag konnte nicht gespeichert werden." };
   revalidatePath(`/w/${list.workspace_id}/lists/${list.id}`);
   return { ok: true };
