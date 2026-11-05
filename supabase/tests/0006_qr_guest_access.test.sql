@@ -1,13 +1,15 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(9);
+select plan(10);
 insert into auth.users(id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,is_anonymous)
 values
 ('31111111-1111-4111-8111-111111111111','authenticated','authenticated','qr-owner@example.test','test',now(),'{}','{}',now(),now(),false),
 ('32222222-2222-4222-8222-222222222222','authenticated','authenticated',null,'test',now(),'{}','{}',now(),now(),true),
 ('33333333-3333-4333-8333-333333333333','authenticated','authenticated','other@example.test','test',now(),'{}','{}',now(),now(),false);
 insert into public.workspaces(id,name,created_by) values('3aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','QR Test','31111111-1111-4111-8111-111111111111');
-insert into public.lists(id,workspace_id,name,kind,created_by) values('3bbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','3aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Geteilte Liste','shopping','31111111-1111-4111-8111-111111111111');
+insert into public.lists(id,workspace_id,name,kind,created_by) values
+ ('3bbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','3aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Geteilte Liste','shopping','31111111-1111-4111-8111-111111111111'),
+ ('3ddddddd-dddd-4ddd-8ddd-dddddddddddd','3aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Interne Liste','tasks','31111111-1111-4111-8111-111111111111');
 insert into public.list_guest_invites(id,list_id,token_hash,created_by,expires_at,max_uses)
 values('3ccccccc-cccc-4ccc-8ccc-cccccccccccc','3bbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',encode(extensions.digest('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq','sha256'),'hex'),'31111111-1111-4111-8111-111111111111',now()+interval '1 day',2);
 
