@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Bell, FileText, Repeat } from "lucide-react";
+import { GuestShare } from "@/components/guest-share";
 import { createListFromTemplate, saveListTemplate, setRecurringTask, createEntryReminder, getDueNotifications, markNotificationRead } from "@/lib/advanced-actions";
 
 type Template={id:string;name:string;kind:string};
@@ -18,7 +19,7 @@ export function ListTools({listId,workspaceId,kind,entries,templates}:{listId:st
  async function useTemplate(){if(!templateId)return;const result=await createListFromTemplate({workspaceId,templateId,name:newListName});if(result.ok&&result.listId)window.location.href=`/w/${workspaceId}/lists/${result.listId}`;else setMessage(result.message??"Vorlage konnte nicht geladen werden.");}
  async function addReminder(entryId:string,value:string){if(!value)return;const result=await createEntryReminder({listId,entryId,remindAt:new Date(value).toISOString()});setMessage(result.ok?"Erinnerung gespeichert.":result.message??"Erinnerung fehlgeschlagen.");}
  async function repeatEntry(entryId:string,frequency:"daily"|"weekly"|"monthly"|"yearly",interval:number,value:string){if(!value)return;const result=await setRecurringTask({listId,entryId,frequency,interval,nextDueAt:new Date(value+"T09:00:00").toISOString()});setMessage(result.ok?"Wiederholung gespeichert.":result.message??"Wiederholung fehlgeschlagen.");}
- return <section className="list-tools">
+ return <section className="list-tools">\n  <GuestShare listId={listId}/>
   <div className="list-tools-row">
    <form onSubmit={e=>{e.preventDefault();startTransition(()=>void saveTemplate());}} className="tool-inline"><FileText size={16}/><input aria-label="Name der Vorlage" placeholder="Vorlage aus dieser Liste speichern" value={templateName} onChange={e=>setTemplateName(e.target.value)} maxLength={100}/><button className="button button-secondary button-small" disabled={busy||!templateName.trim()}>Vorlage speichern</button></form>
    <button type="button" className="button button-ghost button-small" onClick={async()=>{if(!("Notification" in window)){setMessage("Dieser Browser unterstützt keine Benachrichtigungen.");return;}const permission=await Notification.requestPermission();setMessage(permission==="granted"?"Browserbenachrichtigungen aktiviert. Sie erscheinen, solange intelylist geöffnet ist.":"Benachrichtigungen wurden nicht freigegeben.");}}><Bell size={14}/> Benachrichtigungen aktivieren</button>
