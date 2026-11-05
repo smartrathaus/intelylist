@@ -21,6 +21,7 @@ Projekt- und Datenbankgrundlage werden schrittweise aufgebaut. Supabase und Verc
 - [Produktumfang](docs/product-scope.md)
 - [Architektur und Sicherheit](docs/architecture.md)
 - [Bewertung kostenloser Tarife](docs/free-tier-assessment.md)
+- [Agentenorganisation und Arbeitsabläufe](docs/agent-workflows/README.md)
 
 ## Lokale Entwicklung
 Voraussetzungen: Node.js LTS und npm.
