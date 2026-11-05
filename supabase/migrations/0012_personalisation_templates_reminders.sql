@@ -26,8 +26,8 @@ create table if not exists public.user_item_preferences (
 create index if not exists user_item_preferences_recent_idx on public.user_item_preferences(user_id, workspace_id, last_used_at desc);
 alter table public.user_item_preferences enable row level security;
 create policy "users manage own item preferences" on public.user_item_preferences
-for all to authenticated using (user_id = (select auth.uid()) and public.is_workspace_member(workspace_id))
-with check (user_id = (select auth.uid()) and public.is_workspace_member(workspace_id));
+for all to authenticated using (user_id = (select auth.uid()) and private.is_workspace_member(workspace_id))
+with check (user_id = (select auth.uid()) and private.is_workspace_member(workspace_id));
 grant select, insert, update, delete on public.user_item_preferences to authenticated;
 
 create table if not exists public.list_templates (
@@ -41,11 +41,11 @@ create table if not exists public.list_templates (
 );
 alter table public.list_templates enable row level security;
 create policy "members read templates" on public.list_templates for select to authenticated
-using (public.is_workspace_member(workspace_id));
+using (private.is_workspace_member(workspace_id));
 create policy "members create templates" on public.list_templates for insert to authenticated
-with check (created_by = (select auth.uid()) and public.is_workspace_member(workspace_id));
+with check (created_by = (select auth.uid()) and private.is_workspace_member(workspace_id));
 create policy "authors or admins delete templates" on public.list_templates for delete to authenticated
-using (created_by = (select auth.uid()) or public.has_workspace_role(workspace_id, array['owner','admin']::public.workspace_role[]));
+using (created_by = (select auth.uid()) or private.has_workspace_role(workspace_id, array['owner','admin']::public.workspace_role[]));
 grant select, insert, delete on public.list_templates to authenticated;
 
 create table if not exists public.recurring_tasks (
@@ -62,10 +62,10 @@ create table if not exists public.recurring_tasks (
 );
 alter table public.recurring_tasks enable row level security;
 create policy "members read recurring tasks" on public.recurring_tasks for select to authenticated
-using (exists (select 1 from public.lists l where l.id=list_id and public.is_workspace_member(l.workspace_id)));
+using (exists (select 1 from public.lists l where l.id=list_id and private.is_workspace_member(l.workspace_id)));
 create policy "members manage recurring tasks" on public.recurring_tasks for all to authenticated
-using (created_by = (select auth.uid()) and exists (select 1 from public.lists l where l.id=list_id and public.is_workspace_member(l.workspace_id)))
-with check (created_by = (select auth.uid()) and exists (select 1 from public.lists l where l.id=list_id and public.is_workspace_member(l.workspace_id)));
+using (created_by = (select auth.uid()) and exists (select 1 from public.lists l where l.id=list_id and private.is_workspace_member(l.workspace_id)))
+with check (created_by = (select auth.uid()) and exists (select 1 from public.lists l where l.id=list_id and private.is_workspace_member(l.workspace_id)));
 grant select, insert, update, delete on public.recurring_tasks to authenticated;
 
 create table if not exists public.user_notifications (
@@ -82,8 +82,8 @@ create table if not exists public.user_notifications (
 create index if not exists user_notifications_due_idx on public.user_notifications(user_id, remind_at) where read_at is null;
 alter table public.user_notifications enable row level security;
 create policy "users read own notifications" on public.user_notifications for select to authenticated
-using (user_id = (select auth.uid()) and public.is_workspace_member(workspace_id));
+using (user_id = (select auth.uid()) and private.is_workspace_member(workspace_id));
 create policy "users manage own notifications" on public.user_notifications for all to authenticated
-using (user_id = (select auth.uid()) and public.is_workspace_member(workspace_id))
-with check (user_id = (select auth.uid()) and public.is_workspace_member(workspace_id));
+using (user_id = (select auth.uid()) and private.is_workspace_member(workspace_id))
+with check (user_id = (select auth.uid()) and private.is_workspace_member(workspace_id));
 grant select, insert, update, delete on public.user_notifications to authenticated;
