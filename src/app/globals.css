@@ -111,3 +111,13 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-m
  .entry-copy,.entry-copy>span{color:#111!important}.entry-copy small{color:#555!important}
  .welcome-row{margin:0 0 15px!important}.welcome-row h1{font-size:24pt!important}
 }
+
+.list-tools{display:grid;gap:12px;margin:0 0 16px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.list-tools-row,.tool-inline,.template-use{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tool-inline{flex:1;min-width:min(100%,350px)}.tool-inline input{flex:1;min-width:140px;padding:9px 10px;font-size:12px}
+.template-use select,.template-use input{flex:1;min-width:130px;padding:9px;font-size:12px}
+.recurrence-panel summary{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--accent);font-size:12px;font-weight:650}
+.recurrence-list{display:grid;gap:10px;margin-top:12px}.recurrence-row{display:grid;grid-template-columns:minmax(120px,1fr) 2fr 1.5fr;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px}
+.recurrence-row>strong{font-size:12px}.recurrence-row form{display:flex;gap:6px;align-items:center;min-width:0}.recurrence-row input,.recurrence-row select{min-width:0;width:100%;padding:8px;font-size:11px}
+.notice-center{padding:12px;border-radius:10px;background:var(--accent-soft);display:grid;gap:8px}.notice-center>strong{font-size:12px}.notice-center>div{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px}
+@media(max-width:700px){.list-tools-row,.tool-inline,.template-use{align-items:stretch;flex-direction:column}.tool-inline,.tool-inline input,.template-use select,.template-use input,.list-tools-row>.button{width:100%}.recurrence-row{grid-template-columns:1fr}.recurrence-row form{flex-wrap:wrap}.recurrence-row form input,.recurrence-row form select{flex:1 1 100px}.drag-handle{display:grid!important}}
