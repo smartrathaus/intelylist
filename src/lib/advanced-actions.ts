@@ -147,3 +147,11 @@ export async function markNotificationRead(notificationId:string) {
   const {error}=await supabase.from("user_notifications").update({read_at:new Date().toISOString()}).eq("id",notificationId).eq("user_id",user.id);
   return {ok:!error};
 }
+
+export async function getDueNotifications() {
+  const supabase=await createClient();
+  const {data:{user}}=await supabase.auth.getUser();
+  if(!user)return [];
+  const {data}=await supabase.from("user_notifications").select("id,title,body,remind_at").eq("user_id",user.id).is("read_at",null).lte("remind_at",new Date().toISOString()).order("remind_at").limit(20);
+  return data??[];
+}
