@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Circle, Plus, ShoppingBasket, Trash2 } from "lucide-r
 import { createClient } from "@/lib/supabase/server";
 import { EntryManager } from "@/components/entry-manager";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
+import { ListTools } from "@/components/list-tools";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export default async function ListPage({ params, searchParams }: { params: Promi
   if (!list) notFound();
   const { data: entries } = await supabase.from("list_entries").select("id,title,notes,is_completed,priority,due_at,quantity,unit,category,supermarket,assigned_to,created_at").eq("list_id", listId).order("position").order("created_at");
   const { data: historyRows } = list.kind === "shopping" || list.kind === "mixed" ? await supabase.from("shopping_order_history").select("entry_id,session_id,sequence_position,completed_at").eq("list_id", listId).order("completed_at", { ascending: false }).limit(1000) : { data: [] };
+  const { data: templates } = await supabase.from("list_templates").select("id,name,kind").eq("workspace_id", workspaceId).order("created_at", { ascending: false });
   const { data: itemPreferences } = await supabase.from("user_item_preferences").select("display_title,is_favorite,last_used_at").eq("workspace_id", workspaceId).order("last_used_at", { ascending: false }).limit(50);
   const favorites = (itemPreferences ?? []).filter(item => item.is_favorite).map(item => item.display_title.toLocaleLowerCase("de-DE"));
   const recentItems = (itemPreferences ?? []).map(item => item.display_title);
@@ -33,6 +35,7 @@ export default async function ListPage({ params, searchParams }: { params: Promi
     <section className="dashboard list-page">
       <p className="eyebrow">{isShopping ? "EINKAUFSLISTE" : "AUFGABENLISTE"}</p><div className="welcome-row"><div><h1>{list.name}</h1><p className="muted">{entries?.filter(e => !e.is_completed).length ?? 0} offen · {entries?.filter(e => e.is_completed).length ?? 0} erledigt</p></div><div className={`list-icon large ${isShopping ? "shopping" : ""}`}>{isShopping ? <ShoppingBasket size={24}/> : <Check size={24}/>}</div></div>
       {paramsData.error && <p className="notice notice-error">{paramsData.error}</p>}
+      <ListTools listId={listId} workspaceId={workspaceId} kind={list.kind} entries={(entries ?? []).map(e=>({id:e.id,title:e.title,is_completed:e.is_completed}))} templates={(templates ?? []) as {id:string;name:string;kind:string}[]}/>
       <EntryManager listId={listId} workspaceId={workspaceId} favorites={favorites} recentItems={recentItems} kind={list.kind as "tasks"|"shopping"|"mixed"} entries={(entries ?? []) as {id:string;title:string;notes:string|null;is_completed:boolean;priority:string;due_at:string|null;quantity:number|null;unit:string|null;category:string|null;supermarket:string|null;assigned_to:string|null;created_at:string}[]} history={(historyRows ?? []) as {entry_id:string;session_id:string;sequence_position:number;completed_at:string}[]} profiles={(profiles ?? []) as {user_id:string;display_name:string}[]}/>
       <RealtimeRefresh channel={`list-${listId}`} table="list_entries" filter={`list_id=eq.${listId}`}/>
     </section>
