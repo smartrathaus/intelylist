@@ -118,15 +118,44 @@ export async function toggleEntry(formData: FormData) {
   const completed = String(formData.get("completed") ?? "") === "true";
   if (!z.uuid().safeParse(id).success) redirect("/");
   const supabase = await createClient();
-  const { data: entry } = await supabase.from("list_entries").select("id,list_id,lists!inner(workspace_id,kind)").eq("id", id).single();
+  const { data: entry } = await supabase.from("list_entries").select("id,list_id,title,notes,priority,due_at,assigned_to,created_by,position,is_completed,lists!inner(workspace_id,kind)").eq("id", id).single();
   if (!entry) redirect("/");
   const listInfo = entry.lists as unknown as { workspace_id: string; kind: string };
+  const { data: recurrence } = completed && !entry.is_completed
+    ? await supabase.from("recurring_tasks").select("frequency,interval_count,next_due_at").eq("source_entry_id", id).eq("is_active", true).maybeSingle()
+    : { data: null };
   const { error } = listInfo.kind === "shopping" || listInfo.kind === "mixed"
     ? await supabase.rpc("set_list_entry_completion", { target_entry: id, target_list: entry.list_id, completed })
     : await supabase.from("list_entries").update({
         is_completed: completed, completed_at: completed ? new Date().toISOString() : null
       }).eq("id", id);
   if (error) redirect("/");
+  if (recurrence && completed && !entry.is_completed) {
+    const nextDue = new Date(recurrence.next_due_at);
+    const base = nextDue > new Date() ? nextDue : new Date();
+    const interval = recurrence.interval_count ?? 1;
+    if (recurrence.frequency === "daily") base.setDate(base.getDate() + interval);
+    if (recurrence.frequency === "weekly") base.setDate(base.getDate() + interval * 7);
+    if (recurrence.frequency === "monthly") base.setMonth(base.getMonth() + interval);
+    if (recurrence.frequency === "yearly") base.setFullYear(base.getFullYear() + interval);
+    const { data: last } = await supabase.from("list_entries").select("position").eq("list_id", entry.list_id).order("position", { ascending: false }).limit(1).maybeSingle();
+    const { data: nextEntry, error: nextError } = await supabase.from("list_entries").insert({
+      list_id: entry.list_id, title: entry.title, notes: entry.notes, priority: entry.priority,
+      due_at: base.toISOString(), assigned_to: entry.assigned_to, created_by: user.id,
+      position: (last?.position ?? entry.position ?? 0) + 1
+    }).select("id").single();
+    if (!nextError && nextEntry) {
+      const following = new Date(base);
+      if (recurrence.frequency === "daily") following.setDate(following.getDate() + interval);
+      if (recurrence.frequency === "weekly") following.setDate(following.getDate() + interval * 7);
+      if (recurrence.frequency === "monthly") following.setMonth(following.getMonth() + interval);
+      if (recurrence.frequency === "yearly") following.setFullYear(following.getFullYear() + interval);
+      await supabase.from("recurring_tasks").insert({
+        list_id: entry.list_id, source_entry_id: nextEntry.id, created_by: user.id,
+        frequency: recurrence.frequency, interval_count: interval, next_due_at: following.toISOString(), is_active: true
+      });
+    }
+  }
   const workspaceId = listInfo.workspace_id;
   revalidatePath(`/w/${workspaceId}/lists/${entry.list_id}`);
 }
