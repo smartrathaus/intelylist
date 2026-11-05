@@ -7,14 +7,18 @@
 - Supabase migrations live in `supabase/migrations/`; database integration tests live in `supabase/tests/`; app unit tests use Vitest.
 - Use the package scripts in `package.json`: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`; database tests use `npx supabase test db`.
 
-## Mandatory workflow
-1. Read this file and the relevant local code/migrations/tests before editing.
-2. Work only on the assigned feature branch. For the current project workflow, use `feat/initial-app` and keep PR #1 targeted at `main`.
-3. Never push directly to `main`, merge a PR, change production configuration, or deploy to production without explicit user approval.
-4. Before changing database schema or RLS, inspect existing policies, grants, helper functions, triggers, and migration history. Add a new migration; do not rewrite migrations already applied to the shared Supabase project.
-5. Keep changes small and reviewable. Do not claim tests passed unless they were actually run; distinguish local CI tests from tests against the connected Supabase project.
-6. After changes, run the relevant lint, typecheck, unit, database, and build checks. If a check cannot be run, state exactly why.
-7. Review the diff for accidental secrets, environment files, generated artifacts, and unrelated changes.
+## Mandatory issue-first workflow
+1. Every new feature, product improvement, and bug fix starts as a GitHub Issue. Use the Feature Request or Bug Report form; do not start implementation from an informal request alone when a new feature needs requirements or acceptance criteria.
+2. Clarify the problem, user value, scope, dependencies, risks, and testable acceptance criteria in the Issue. Split large requests into smaller Issues. Link related Issues rather than duplicating work.
+3. Work on an Issue only after its scope and acceptance criteria are clear. For this project, use the assigned feature branch `feat/initial-app` unless the user explicitly requests a separate branch. Mention the Issue number in branch/commit/PR context.
+4. Every Pull Request must contain a closing reference such as `Closes #123`. The `Issue-first workflow` GitHub Action checks that at least one linked Issue exists and remains open. Do not bypass this check.
+5. Implement only the agreed scope. If requirements change materially, update the Issue first and record the decision there. Add tests and documentation with the implementation.
+6. PR review checks the acceptance criteria, security, UX, tests, and deployment risks. Close the Issue through the PR only after merge; never close it merely because implementation started.
+7. Never push directly to `main`, merge a PR, change production configuration, or deploy to production without explicit user approval.
+8. Before changing database schema or RLS, inspect existing policies, grants, helper functions, triggers, and migration history. Add a new migration; do not rewrite migrations already applied to the shared Supabase project.
+9. Keep changes small and reviewable. Do not claim tests passed unless they were actually run; distinguish local CI tests from tests against the connected Supabase project.
+10. After changes, run the relevant lint, typecheck, unit, database, and build checks. If a check cannot be run, state exactly why.
+11. Review the diff for accidental secrets, environment files, generated artifacts, and unrelated changes.
 
 ## Security rules
 - RLS is the authoritative tenant boundary. UI checks and Server Action checks do not replace RLS.
