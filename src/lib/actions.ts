@@ -37,7 +37,7 @@ export async function signUp(formData: FormData) {
     options: { data: { display_name: displayName || undefined }, emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent(next)}` : undefined }
   });
   if (error) redirect("/login?error=Registrierung+nicht+moeglich.+Bitte+spaeter+erneut+versuchen.");
-  redirect("/login?message=Bitte+pruefe+dein+Postfach+und+bestaetige+deine+E-Mail.");
+  redirect(`/login?message=Bitte+pruefe+dein+Postfach+und+bestaetige+deine+E-Mail.&next=${encodeURIComponent(next)}`);
 }
 
 export async function signOut() {
