@@ -179,6 +179,14 @@ export async function redeemListGuestInvite(token:string) {
  const {data:{user}}=await supabase.auth.getUser();
  if(!user)return {ok:false,message:"Bitte starte den Gastzugang erneut."};
  const {data,error}=await supabase.rpc("redeem_list_guest_invite",{raw_token:token});
- if(error||!data?.[0])return {ok:false,message:"Dieser Gastzugang ist abgelaufen, widerrufen oder ausgeschöpft."};
+ if(error){
+  console.error("Guest invite redemption failed",{code:error.code,message:error.message,details:error.details,hint:error.hint});
+  if(error.code==="P0002")return {ok:false,message:"Dieser Gastlink ist nicht mehr gültig. Bitte lass dir einen neuen QR-Code erstellen."};
+  if(error.code==="P0001")return {ok:false,message:"Dieser Gastlink wurde bereits zu oft verwendet. Bitte lass dir einen neuen QR-Code erstellen."};
+  if(error.code==="22023")return {ok:false,message:"Der QR-Code ist ungültig. Bitte prüfe den Link oder lass dir einen neuen erstellen."};
+  if(error.code==="42501")return {ok:false,message:"Der Gastzugang ist momentan nicht korrekt freigeschaltet. Bitte informiere den Listeninhaber."};
+  return {ok:false,message:"Der Gastzugang konnte wegen eines technischen Fehlers nicht eingelöst werden. Bitte versuche es später erneut."};
+ }
+ if(!data?.[0])return {ok:false,message:"Der Gastlink konnte keiner Liste zugeordnet werden. Bitte lass dir einen neuen QR-Code erstellen."};
  return {ok:true,listId:data[0].list_id,listName:data[0].list_name,expiresAt:data[0].expires_at};
 }
