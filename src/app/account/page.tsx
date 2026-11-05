@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, Layers3, ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { deleteOwnAccount } from "@/lib/actions";
+import { ThemeSettingsPanel } from "@/components/theme-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,8 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   if (!user) redirect("/login");
   const { data: memberships } = await supabase.from("workspace_members").select("workspace_id,role").eq("user_id", user.id);
   const owned = (memberships ?? []).filter((item) => item.role === "owner").length;
+  const { data: preferences } = await supabase.from("user_preferences").select("theme,color_mode,accent_color").eq("user_id", user.id).maybeSingle();
+  const themeSettings = { theme: preferences?.theme ?? "fresh-mint", colorMode: preferences?.color_mode ?? "system", accentColor: preferences?.accent_color ?? null };
   const { error } = await searchParams;
   return <main className="app-shell">
     <header className="topbar"><Link href="/" className="brand"><span className="brand-mark"><ArrowLeft size={18}/></span><span>Zur Übersicht</span></Link></header>
@@ -19,6 +22,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <div className="brand"><img className="brand-logo" src="/intelylist-logo.svg" alt="intelylist – Intelligente Aufgabenverwaltung"/></div>
       <p className="eyebrow">KONTO</p><h1>Kontoeinstellungen</h1>
       <p className="muted">Angemeldet als {user.email}</p>
+      <ThemeSettingsPanel initial={themeSettings}/>
       <section className="account-panel"><h2>Passwort</h2><p className="muted">Du kannst jederzeit einen Link zum Zurücksetzen deines Passworts anfordern.</p><Link className="button button-secondary" href="/login/reset">Passwort zurücksetzen</Link></section>
       <section className="account-danger"><div className="account-danger-title"><ShieldAlert size={19}/><h2>Konto dauerhaft löschen</h2></div>
         <p>Dein Konto und dein Profil werden entfernt. Deine Mitgliedschaften und persönlichen Einladungen werden gelöscht. Von dir erstellte Listen und Einträge bleiben für die anderen Mitglieder erhalten; deine Urheberschaft wird anonymisiert.</p>
